@@ -74,6 +74,22 @@ button.on{background:#fbefe0;border-color:var(--saffron);color:var(--maroon)}
 .reveal{padding:4px 14px 18px}
 .reveal button{width:100%;padding:14px;font-size:17px}
 .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12.5px;color:var(--soft);margin:14px 2px}
+.phone{display:none}
+.hl{background:#fbe9d2;border-radius:6px;padding:0 2px}
+.wcard{text-align:center;padding:4px 0 2px}
+.wlab{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--saffron)}
+.wbig{font-family:"Sarabun","Leelawadee UI",Tahoma,sans-serif;font-size:40px;color:var(--maroon);line-height:1.5}
+.wsent{font-family:"Sarabun","Leelawadee UI",Tahoma,sans-serif;font-size:18px;color:var(--soft)}
+.wback{margin-bottom:8px}.wback .gt{font-family:"Sarabun","Leelawadee UI",Tahoma,sans-serif;font-size:30px;color:var(--maroon)}
+.wback .gr{font-size:18px}.wback .row{font-size:15.5px;margin-top:2px}.wback .lab{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--saffron);margin-right:6px}
+.wback .pali{font-style:italic;color:#6b4a2a}
+.thai.small{font-size:21px}
+.w.hlw{background:#fbe9d2}
+.trhid .trin{display:none}.trshow{display:none;font-size:13.5px;padding:4px 10px;color:var(--soft)}.trhid .trshow{display:inline-block}
+button:disabled{opacity:.4;cursor:default}
+.mini{font-size:12px;padding:3px 8px;margin-left:6px}
+.card.swl{animation:swl .25s}.card.swr{animation:swr .25s}
+@keyframes swl{30%{transform:translateX(-14px)}}@keyframes swr{30%{transform:translateX(14px)}}
 .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
 nav.tabs{display:flex;gap:6px;margin:18px 0 10px}
 .panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:none}
@@ -96,6 +112,7 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
   .stats{font-size:12px;gap:4px}.pill{padding:4px 8px}
   .controls{padding:7px 8px;gap:6px}.controls button{padding:6px 10px;font-size:14.5px}
   .body{padding:12px 14px 2px}
+  .phone{display:inline}.lbl{display:none}
   .rate{padding:4px 10px 10px;gap:6px}.rate button{padding:6px 2px}
   .gloss{padding:7px 10px;margin-bottom:6px}.gloss .gt{font-size:20px}.gloss .row{font-size:14px}
   .reveal{padding:2px 10px 12px}.reveal button{padding:12px}
@@ -122,7 +139,8 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
         <button class="primary" id="startBtn">Start session</button></div></div>
     </div></div>
     <div class="controls">
-      <button id="replay">↻ Replay</button>
+      <button id="prev" title="Previous card (←)">↶<span class="lbl"> Previous</span></button>
+      <button id="replay">↻<span class="lbl"> Replay</span></button>
       <button id="slow">0.75×</button>
       <button id="ctx" title="Play a little before and after">Context</button>
       <span class="meta" id="meta"></span>
@@ -143,7 +161,7 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
     <span><i style="background:var(--t-fall)"></i>falling ( ^ )</span>
     <span><i style="background:var(--t-high)"></i>high ( ´ )</span>
     <span><i style="background:var(--t-rise)"></i>rising ( ˘ )</span>
-    <span>Tap any word for its meaning.</span>
+    <span>Tap any word for its meaning.</span><span class="phone">Swipe ← Again · Good →</span>
   </div>
 
   <nav class="tabs">
@@ -156,6 +174,8 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
   <div class="panel" id="pSet">
     <div class="row-set">New cards per day <input type="number" id="newPerDay" min="1" max="50"></div>
     <div class="row-set"><label><input type="checkbox" id="autoplay"> Play the clip automatically on each card</label></div>
+    <div class="row-set"><label><input type="checkbox" id="replayReveal"> Play the clip again when I press Show answer</label></div>
+    <div class="row-set"><label><input type="checkbox" id="hideTr"> Hide the transliteration until I tap it</label></div>
     <div class="row-set"><button id="resetBtn">Reset my progress</button><span class="small" id="resetMsg"></span></div>
     <p class="small">Progress is kept in this browser on this device.</p>
   </div>
@@ -212,14 +232,30 @@ const CARDS = [
 /* ---------- storage ---------- */
 const KEY="talkcards.th.jayasaro.vedana";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-let S=load(); S.cards=S.cards||{}; S.words=S.words||[]; S.newPerDay=S.newPerDay||10;
-S.autoplay = S.autoplay!==false;
-const today=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);
-if(S.day!==today()){S.day=today();S.newToday=0}
+let S=load();
+function norm(){
+  S.cards=S.cards||{}; S.words=S.words||[]; S.newPerDay=S.newPerDay||10;
+  if(S.autoplay===undefined) S.autoplay=true;
+  if(S.replayOnReveal===undefined) S.replayOnReveal=true;
+  if(S.hideTr===undefined) S.hideTr=false;
+  for(const k of Object.keys(S.cards)) if(/^\d+$/.test(k)){S.cards["s"+k]=S.cards[k];delete S.cards[k]}
+  if(S.day!==today()){S.day=today();S.newToday=0}
+}
+function today(){return Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5)}
+let onSave=null;
+function save(){S.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){} if(onSave) onSave()}
+norm();
+
+/* ---------- items: sentence cards + saved-word cards ---------- */
+const wKey=w=>"w:"+w[0]+"|"+w[2];
+function items(){
+  const list=CARDS.map(c=>({key:"s"+c.id,type:"s",c}));
+  for(const w of S.words){const c=CARDS.find(x=>x.id===w[5]); if(c) list.push({key:wKey(w),type:"w",w,c})}
+  return list;
+}
 
 /* ---------- scheduling (SM-2 style) ---------- */
-function st(id){return S.cards[id]||{reps:0,ease:2.5,ivl:0,due:0,seen:false}}
+function st(k){return S.cards[k]||{reps:0,ease:2.5,ivl:0,due:0,seen:false}}
 function preview(c,q){
   let ease=c.ease, ivl;
   if(q===0) return {ivl:0,ease:Math.max(1.3,ease-.2)};
@@ -230,11 +266,12 @@ function preview(c,q){
 }
 function label(d){return d===0?"<10 min":d===1?"1 day":d<30?d+" days":Math.round(d/30)+" mo"}
 function queue(){
-  const due=[], fresh=[];
-  for(const c of CARDS){const s=st(c.id); if(s.seen){ if(s.due<=Date.now()) due.push(c)} else fresh.push(c)}
-  due.sort((a,b)=>st(a.id).due-st(b.id).due);
+  const due=[], freshW=[], freshS=[];
+  for(const it of items()){const s=st(it.key);
+    if(s.seen){ if(s.due<=Date.now()) due.push(it)} else (it.type==="w"?freshW:freshS).push(it)}
+  due.sort((a,b)=>st(a.key).due-st(b.key).due);
   const room=Math.max(0,S.newPerDay-(S.newToday||0));
-  return {due, fresh:fresh.slice(0,room), allNew:fresh.length};
+  return {due, fresh:[...freshW,...freshS].slice(0,room), allNew:freshW.length+freshS.length};
 }
 
 /* ---------- tones ---------- */
@@ -249,7 +286,7 @@ function colorTr(tr){
 }
 
 /* ---------- YouTube ---------- */
-let player, ready=false, stopAt=null, timer=null, rate=1, current=null, revealed=false;
+let player, ready=false, stopAt=null, timer=null, rate=1, cur=null, revealed=false, started=false;
 const tag=document.createElement("script"); tag.src="https://www.youtube.com/iframe_api"; document.head.appendChild(tag);
 window.onYouTubeIframeAPIReady=()=>{
   player=new YT.Player("player",{videoId:VIDEO,playerVars:{rel:0,modestbranding:1,playsinline:1,controls:0,cc_load_policy:0,iv_load_policy:3},
@@ -261,68 +298,118 @@ function play(s,e){
   clearInterval(timer);
   timer=setInterval(()=>{ if(player.getCurrentTime()>=stopAt){player.pauseVideo();clearInterval(timer)} },80);
 }
+const playCur=()=>cur&&play(cur.c.s,cur.c.e);
 const $=id=>document.getElementById(id);
-$("replay").onclick=()=>current&&play(current.s,current.e);
-$("ctx").onclick=()=>current&&play(Math.max(0,current.s-4),current.e+3);
-$("slow").onclick=()=>{rate=rate===1?.75:1;$("slow").classList.toggle("on",rate!==1);current&&play(current.s,current.e)};
+$("replay").onclick=playCur;
+$("ctx").onclick=()=>cur&&play(Math.max(0,cur.c.s-4),cur.c.e+3);
+$("slow").onclick=()=>{rate=rate===1?.75:1;$("slow").classList.toggle("on",rate!==1);playCur()};
+
+/* ---------- history (Previous) ---------- */
+const hist=[];
+function updPrev(){$("prev").disabled=!hist.length}
+$("prev").onclick=()=>{
+  const h=hist.pop(); if(!h) return;
+  if(h.before) S.cards[h.key]=h.before; else delete S.cards[h.key];
+  if(h.wasNew) S.newToday=Math.max(0,(S.newToday||0)-1);
+  save(); cur=items().find(x=>x.key===h.key); updPrev(); stats();
+  if(cur){ setMeta(); show(true); }
+};
 
 /* ---------- card flow ---------- */
 function stats(){
   const q=queue(); $("sNew").textContent=q.allNew; $("sDue").textContent=q.due.length;
-  $("sDone").textContent=CARDS.filter(c=>st(c.id).seen&&st(c.id).ivl>=1).length;
+  $("sDone").textContent=items().filter(it=>st(it.key).seen&&st(it.key).ivl>=1).length;
+}
+function setMeta(){
+  const s=st(cur.key);
+  $("meta").textContent=cur.type==="w"?`word · ${cur.c.id}/${CARDS.length}`:`${cur.c.id} / ${CARDS.length}${s.seen?" · review":""}`;
 }
 function next(){
-  const q=queue(); current=q.due[0]||q.fresh[0]||null; revealed=false;
+  const q=queue(); cur=q.due[0]||q.fresh[0]||null; revealed=false; openW=-1;
   stats(); $("rateBox").style.display="none";
-  if(!current){
+  if(!cur){
     $("body").innerHTML=`<div class="done-box"><h2>Sādhu, all done for today</h2><p class="small">Come back tomorrow for the cards that are due.<br>You can raise the number of new cards in Settings.</p></div>`;
     $("revealBox").style.display="none"; $("meta").textContent=""; return;
   }
-  const s=st(current.id);
-  $("meta").textContent=`${current.id} / ${CARDS.length}${s.seen?" · review":""}`;
-  $("body").innerHTML=`${current.flag?'<div class="flag">'+current.note+'</div>':''}<div class="hint">Listen, and try to understand before you reveal.</div>`;
+  setMeta();
+  const c=cur.c;
+  if(cur.type==="w"){
+    const w=cur.w;
+    const sent=c.t.map(x=>x[0]===w[0]?`<span class="hl">${x[0]}</span>`:x[0]).join("");
+    $("body").innerHTML=`<div class="wcard"><div class="wlab">Saved word</div><div class="wbig">${w[0]}</div><div class="wsent">${sent}</div></div>`;
+  } else {
+    $("body").innerHTML=`${c.flag?'<div class="flag">'+c.note+'</div>':''}<div class="hint">Listen, and try to understand before you reveal.</div>`;
+  }
   $("revealBox").style.display="block";
-  if(S.autoplay) play(current.s,current.e);
+  if(S.autoplay) playCur();
 }
-function show(){
-  revealed=true; openW=-1; const c=current;
-  const thai=c.t.map((w,i)=>`<span class="w" data-i="${i}">${w[0]}</span>`).join("");
+function trLine(c){
   const tr=c.t.map((w,i)=>`<span class="w" data-i="${i}">${colorTr(w[1])}</span>`).join(" ");
-  $("body").innerHTML=`${c.note&&!c.flag?'<div class="flag">'+c.note+'</div>':''}${c.flag?'<div class="flag">'+c.note+'</div>':''}
-    <div class="gloss" id="gloss"></div><div class="thai">${thai}</div><div class="tr">${tr}</div>
+  return S.hideTr?`<div class="tr trhid" id="trBox"><button class="trshow" id="trShow">Show transliteration</button><span class="trin">${tr}</span></div>`:`<div class="tr">${tr}</div>`;
+}
+function show(fromPrev){
+  revealed=true; openW=-1; const c=cur.c;
+  const thai=c.t.map((w,i)=>`<span class="w" data-i="${i}">${w[0]}</span>`).join("");
+  let top="";
+  if(cur.type==="w"){
+    const w=cur.w;
+    top=`<div class="wback"><span class="gt">${w[0]}</span> <span class="gr">${colorTr(w[1])}</span>
+      <div class="row"><span class="lab">Dictionary</span>${w[2]}</div>
+      ${w[3]&&w[3]!==w[2]?`<div class="row"><span class="lab">Here</span>${w[3]}</div>`:""}
+      ${w[4]?`<div class="row"><span class="lab">Pāli</span><span class="pali">${w[4]}</span></div>`:""}</div>`;
+  }
+  $("body").innerHTML=`${c.note?'<div class="flag">'+c.note+'</div>':''}${top}
+    <div class="gloss" id="gloss"></div><div class="thai${cur.type==="w"?" small":""}">${thai}</div>${trLine(c)}
     <div class="en">${c.en}</div>`;
+  if(cur.type==="w") $("body").querySelectorAll(".thai .w").forEach(el=>{ if(c.t[+el.dataset.i][0]===cur.w[0]) el.classList.add("hlw") });
   $("body").querySelectorAll(".w").forEach(el=>el.onclick=()=>gloss(+el.dataset.i));
+  if($("trShow")) $("trShow").onclick=()=>$("trBox").classList.remove("trhid");
   $("revealBox").style.display="none"; $("rateBox").style.display="grid";
-  const s=st(c.id); for(let q=0;q<4;q++) $("i"+q).textContent=label(preview(s,q).ivl);
+  const s=st(cur.key); for(let q=0;q<4;q++) $("i"+q).textContent=label(preview(s,q).ivl);
+  if(S.replayOnReveal||fromPrev) playCur();
 }
 let openW=-1;
 function gloss(i,keep){
-  const w=current.t[i], g=$("gloss");
+  const w=cur.c.t[i], g=$("gloss");
   if(openW===i&&!keep){g.classList.remove("show");openW=-1;$("body").querySelectorAll(".w").forEach(el=>el.classList.remove("sel"));return}
   openW=i;
   $("body").querySelectorAll(".w").forEach(el=>el.classList.toggle("sel",+el.dataset.i===i));
   const saved=S.words.some(x=>x[0]===w[0]&&x[2]===w[2]);
   g.innerHTML=`<div class="ghead"><span class="gt">${w[0]}</span><span class="gr">${colorTr(w[1])}</span>
-    <button class="save" id="saveW" title="Save word">${saved?"★":"☆"}</button></div>
+    <button class="save" id="saveW" title="${saved?"Saved as a card":"Save as a card"}">${saved?"★":"☆"}</button></div>
     <div class="row"><span class="lab">Dictionary</span>${w[2]}</div>
     ${w[3]&&w[3]!==w[2]?`<div class="row"><span class="lab">Here</span>${w[3]}</div>`:""}
     ${w[4]?`<div class="row"><span class="lab">Pāli</span><span class="pali">${w[4]}</span></div>`:""}`;
   g.classList.add("show");
-  $("saveW").onclick=()=>{ if(!saved){S.words.push([...w,current.id]);save();gloss(i,true);renderWords()} };
+  $("saveW").onclick=()=>{ if(!saved){S.words.push([...w,cur.c.id]);save();gloss(i,true);renderWords();stats()} };
 }
-$("reveal").onclick=show;
-$("rateBox").querySelectorAll("button").forEach(b=>b.onclick=()=>{
-  const q=+b.dataset.q, s=st(current.id), p=preview(s,q);
+function rateCard(q){
+  if(!revealed||!cur) return;
+  const s=st(cur.key), p=preview(s,q), before=S.cards[cur.key]?{...S.cards[cur.key]}:null;
+  hist.push({key:cur.key,before,wasNew:!s.seen}); if(hist.length>50) hist.shift();
   if(!s.seen) S.newToday=(S.newToday||0)+1;
-  S.cards[current.id]={seen:true,reps:q===0?0:s.reps+1,ease:p.ease,ivl:p.ivl,due:Date.now()+(p.ivl===0?6e5:p.ivl*864e5)};
-  save(); next();
-});
+  S.cards[cur.key]={seen:true,reps:q===0?0:s.reps+1,ease:p.ease,ivl:p.ivl,due:Date.now()+(p.ivl===0?6e5:p.ivl*864e5)};
+  save(); updPrev(); next();
+}
+$("reveal").onclick=()=>show();
+$("rateBox").querySelectorAll("button").forEach(b=>b.onclick=()=>rateCard(+b.dataset.q));
 document.addEventListener("keydown",e=>{
-  if(e.target.tagName==="INPUT")return;
-  if(e.code==="Space"){e.preventDefault(); if(!revealed&&current) show(); else if(current) play(current.s,current.e)}
-  if(revealed&&["Digit1","Digit2","Digit3","Digit4"].includes(e.code)) $("rateBox").querySelectorAll("button")[+e.code.slice(-1)-1].click();
+  if(e.target.tagName==="INPUT"||!started)return;
+  if(e.code==="Space"){e.preventDefault(); if(!revealed&&cur) show(); else playCur()}
+  if(revealed&&["Digit1","Digit2","Digit3","Digit4"].includes(e.code)) rateCard(+e.code.slice(-1)-1);
+  if(e.code==="ArrowLeft"&&hist.length) $("prev").click();
 });
-$("startBtn").onclick=()=>{$("shade").style.display="none"; next(); if(!S.autoplay&&current) play(current.s,current.e)};
+/* swipe: before reveal any swipe shows the answer; after: left = Again, right = Good */
+let tx=null,ty=null;
+$("card").addEventListener("touchstart",e=>{const t=e.touches[0];tx=t.clientX;ty=t.clientY},{passive:true});
+$("card").addEventListener("touchend",e=>{
+  if(tx===null||!started||!cur) return; const t=e.changedTouches[0], dx=t.clientX-tx, dy=t.clientY-ty; tx=null;
+  if(Math.abs(dx)<60||Math.abs(dx)<2*Math.abs(dy)) return;
+  const card=$("card"); card.classList.remove("swl","swr"); void card.offsetWidth;
+  if(!revealed){show();return}
+  card.classList.add(dx<0?"swl":"swr"); rateCard(dx<0?0:2);
+},{passive:true});
+$("startBtn").onclick=()=>{started=true;$("shade").style.display="none"; next(); if(!S.autoplay) playCur()};
 
 /* ---------- panels ---------- */
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{
@@ -332,19 +419,29 @@ document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{
   if(!open){p.classList.add("show");b.classList.add("on")}
 });
 function renderWords(){
-  $("pWords").innerHTML=S.words.length?S.words.map(w=>`<div class="list-item"><span class="th">${w[0]}</span> &nbsp;${colorTr(w[1])}<br>${w[2]}${w[4]?` · <i class="pali">${w[4]}</i>`:""} <span class="small">· sentence ${w[5]}</span></div>`).join("")
-    :`<p class="small">Tap ☆ Save word on any word you want to keep. Saved words will become their own cards later.</p>`;
+  $("pWords").innerHTML=S.words.length?S.words.map((w,i)=>{const s=st(wKey(w));
+    return `<div class="list-item"><span class="th">${w[0]}</span> &nbsp;${colorTr(w[1])}<br>${w[2]}${w[4]?` · <i class="pali">${w[4]}</i>`:""}
+    <span class="small">· sentence ${w[5]} · ${s.seen?"next in "+label(Math.max(0,Math.round((s.due-Date.now())/864e5))):"new card"}</span>
+    <button class="mini" data-rm="${i}">Remove</button></div>`}).join("")
+    :`<p class="small">Tap a word, then ☆, to save it.<br>Each saved word becomes its own card, with the clip where you met it.</p>`;
+  $("pWords").querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const w=S.words[+b.dataset.rm];delete S.cards[wKey(w)];S.words.splice(+b.dataset.rm,1);save();renderWords();stats()});
 }
 function renderAll(){
-  $("pAll").innerHTML=CARDS.map(c=>{const s=st(c.id);
+  $("pAll").innerHTML=CARDS.map(c=>{const s=st("s"+c.id);
     return `<div class="list-item"><span class="th">${c.t.map(w=>w[0]).join("")}</span><br>${c.en}<br><span class="small">${Math.floor(c.s/60)}:${String(Math.floor(c.s%60)).padStart(2,"0")} · ${s.seen?"next in "+label(Math.max(0,Math.round((s.due-Date.now())/864e5))):"not started"}</span></div>`}).join("");
 }
-$("newPerDay").value=S.newPerDay;
+function syncSettings(){
+  $("newPerDay").value=S.newPerDay; $("autoplay").checked=S.autoplay;
+  $("replayReveal").checked=S.replayOnReveal; $("hideTr").checked=S.hideTr;
+}
 $("newPerDay").onchange=e=>{S.newPerDay=Math.max(1,+e.target.value||10);save();stats()};
-$("autoplay").checked=S.autoplay; $("autoplay").onchange=e=>{S.autoplay=e.target.checked;save()};
-$("resetBtn").onclick=()=>{ if($("resetBtn").dataset.sure){S.cards={};S.newToday=0;save();$("resetMsg").textContent="Progress cleared.";delete $("resetBtn").dataset.sure;stats();renderAll()} else {$("resetBtn").dataset.sure=1;$("resetMsg").textContent="Press again to confirm."} };
+$("autoplay").onchange=e=>{S.autoplay=e.target.checked;save()};
+$("replayReveal").onchange=e=>{S.replayOnReveal=e.target.checked;save()};
+$("hideTr").onchange=e=>{S.hideTr=e.target.checked;save(); if(revealed&&cur) show(true)};
+$("resetBtn").onclick=()=>{ if($("resetBtn").dataset.sure){S.cards={};S.newToday=0;hist.length=0;updPrev();save();$("resetMsg").textContent="Progress cleared.";delete $("resetBtn").dataset.sure;stats();renderAll()} else {$("resetBtn").dataset.sure=1;$("resetMsg").textContent="Press again to confirm."} };
 document.querySelector('[data-p="pAll"]').addEventListener("click",renderAll);
-renderWords(); stats();
+function refreshAll(){norm();syncSettings();renderWords();stats();}
+refreshAll(); updPrev();
 </script>
 </body>
 </html>
