@@ -282,7 +282,7 @@ function gloss(i){
   const saved=S.words.some(x=>x[0]===w[0]&&x[2]===w[2]);
   g.innerHTML=`<span class="gt">${w[0]}</span><span class="gr">${colorTr(w[1])}</span>
     <div class="row"><span class="lab">Dictionary</span>${w[2]}</div>
-    <div class="row"><span class="lab">Here</span>${w[3]}</div>
+    ${w[3]&&w[3]!==w[2]?`<div class="row"><span class="lab">Here</span>${w[3]}</div>`:""}
     ${w[4]?`<div class="row"><span class="lab">Pāli / Sanskrit</span><span class="pali">${w[4]}</span></div>`:""}
     <button class="save" id="saveW">${saved?"★ Saved":"☆ Save word"}</button>`;
   g.classList.add("show");
