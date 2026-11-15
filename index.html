@@ -224,7 +224,8 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
     <div class="row-set"><label><input type="checkbox" id="autoplay"> Play the clip automatically on each card</label></div>
     <div class="row-set"><label><input type="checkbox" id="replayReveal"> Play the clip again when I press Show answer</label></div>
     <div class="row-set"><label><input type="checkbox" id="hideTr"> Hide the transliteration until I tap it</label></div>
-    <div class="row-set"><label><input type="checkbox" id="followOn"> Light up each word as he says it, with its meaning</label></div>
+    <div class="row-set"><label><input type="checkbox" id="followOn"> Light up each word as he says it</label></div>
+    <div class="row-set"><label><input type="checkbox" id="meaningOn"> Show each word’s meaning as he says it</label></div>
     <div class="row-set"><button id="resetBtn">Reset my progress</button><span class="small" id="resetMsg"></span></div>
     <div class="sync" id="syncBox">
       <div class="row-set"><b style="font-weight:600">Sync between devices</b></div>
@@ -471,7 +472,7 @@ function show(fromPrev){
   }
   $("body").innerHTML=`${c.note?'<div class="flag">'+c.note+'</div>':''}${top}
     <div class="gloss" id="gloss"></div><div class="thai${cur.type==="w"?" small":""}">${thai}</div>${trLine(c)}
-    ${c.wt&&S.follow!==false?'<div class="live" id="live"></div>':''}<div class="en">${c.en}</div>`;
+    ${c.wt&&S.follow!==false&&S.liveMeaning!==false?'<div class="live" id="live"></div>':''}<div class="en">${c.en}</div>`;
   if(cur.type==="w") $("body").querySelectorAll(".thai .w").forEach(el=>{ if(c.t[+el.dataset.i][0]===cur.w[0]) el.classList.add("hlw") });
   $("body").querySelectorAll(".w").forEach(el=>el.onclick=()=>gloss(+el.dataset.i));
   if($("trShow")) $("trShow").onclick=()=>$("trBox").classList.remove("trhid");
@@ -611,12 +612,13 @@ function renderAll(){
 }
 function syncSettings(){
   $("newPerDay").value=S.newPerDay; $("autoplay").checked=S.autoplay;
-  $("replayReveal").checked=S.replayOnReveal; $("hideTr").checked=S.hideTr; $("followOn").checked=S.follow!==false;
+  $("replayReveal").checked=S.replayOnReveal; $("hideTr").checked=S.hideTr; $("followOn").checked=S.follow!==false; $("meaningOn").checked=S.liveMeaning!==false;
 }
 $("newPerDay").onchange=e=>{S.newPerDay=Math.max(1,+e.target.value||10);save();stats()};
 $("autoplay").onchange=e=>{S.autoplay=e.target.checked;save()};
 $("replayReveal").onchange=e=>{S.replayOnReveal=e.target.checked;save()};
-$("followOn").onchange=e=>{S.follow=e.target.checked;save();follow(-1)};
+$("followOn").onchange=e=>{S.follow=e.target.checked;save();follow(-1);if(revealed&&cur)show(true)};
+$("meaningOn").onchange=e=>{S.liveMeaning=e.target.checked;save();if(revealed&&cur)show(true)};
 $("hideTr").onchange=e=>{S.hideTr=e.target.checked;save(); if(revealed&&cur) show(true)};
 $("resetBtn").onclick=()=>{ if($("resetBtn").dataset.sure){S.cards={};S.newToday=0;hist.length=0;updPrev();save();$("resetMsg").textContent="Progress cleared.";delete $("resetBtn").dataset.sure;stats();renderAll()} else {$("resetBtn").dataset.sure=1;$("resetMsg").textContent="Press again to confirm."} };
 document.querySelector('[data-p="pAll"]').addEventListener("click",renderAll);
