@@ -91,6 +91,15 @@ button:disabled{opacity:.4;cursor:default}
 .card.swl{animation:swl .25s}.card.swr{animation:swr .25s}
 @keyframes swl{30%{transform:translateX(-14px)}}@keyframes swr{30%{transform:translateX(14px)}}
 .sync{border-top:1px solid var(--line);margin-top:12px;padding-top:6px}
+.pre .controls,.pre .body,.pre .reveal,.pre .rate{display:none!important}
+.pre .video::after{content:"";position:absolute;inset:0;z-index:2}
+.startPanel{text-align:center;padding:22px 20px 26px}
+.card:not(.pre) .startPanel{display:none}
+.sp-k{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--saffron)}
+.sp-n{font-size:24px;color:var(--deep);margin:6px 0 18px}
+.sp-n b{font-weight:600}.sp-n .dot{color:var(--line);margin:0 4px}
+.sp-go{font-size:20px;padding:16px 30px;width:min(100%,360px);border-radius:16px;box-shadow:0 10px 24px -12px rgba(125,46,36,.7)}
+.sp-p{color:var(--soft);font-size:15px;margin:16px 0 0;line-height:1.5}
 .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
 nav.tabs{display:flex;gap:6px;margin:18px 0 10px}
 .panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:none}
@@ -134,11 +143,15 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
     </div>
   </header>
 
-  <div class="card" id="card">
+  <div class="card pre" id="card">
     <div class="stage"><div class="video"><div id="player"></div>
-      <div class="shade" id="shade"><div><h2>Ready when you are</h2><p>Listen first, then reveal.</p>
-        <button class="primary" id="startBtn">Start session</button></div></div>
     </div></div>
+    <div class="startPanel" id="shade">
+      <div class="sp-k">Today’s session</div>
+      <div class="sp-n"><b id="spNew">0</b> new <span class="dot">·</span> <b id="spDue">0</b> to review</div>
+      <button class="primary sp-go" id="startBtn">▶&nbsp; Start session</button>
+      <p class="sp-p">Each card plays Ajahn Jayasaro saying one sentence.<br>Listen first, then reveal the answer.</p>
+    </div>
     <div class="controls">
       <button id="prev" title="Previous card (←)">←<span class="lbl"> Previous</span></button>
       <button id="replay">↻<span class="lbl"> Replay</span></button>
@@ -364,6 +377,7 @@ $("prev").onclick=()=>{
 /* ---------- card flow ---------- */
 function stats(){
   const q=queue(); $("sNew").textContent=q.allNew; $("sDue").textContent=q.due.length;
+  $("spNew").textContent=q.fresh.length; $("spDue").textContent=q.due.length;
   $("sDone").textContent=items().filter(it=>st(it.key).seen&&st(it.key).ivl>=1).length;
 }
 function setMeta(){
@@ -455,7 +469,7 @@ $("card").addEventListener("touchend",e=>{
   if(!revealed){show();return}
   card.classList.add(dx<0?"swl":"swr"); rateCard(dx<0?0:2);
 },{passive:true});
-$("startBtn").onclick=()=>{started=true;$("shade").style.display="none"; next(); if(!S.autoplay) playCur()};
+$("startBtn").onclick=()=>{started=true;$("card").classList.remove("pre"); next(); if(!S.autoplay) playCur()};
 
 /* ---------- panels ---------- */
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{
