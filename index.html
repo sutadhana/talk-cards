@@ -162,6 +162,7 @@ nav.tabs{display:flex;gap:6px;margin:18px 0 10px}
 .list-item .th{font-family:"Sarabun","Leelawadee UI",Tahoma,sans-serif;font-size:19px}
 .small{font-size:13px;color:var(--soft)}
 .row-set{display:flex;align-items:center;gap:10px;margin:8px 0;flex-wrap:wrap}
+select{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:#fff;max-width:220px}
 input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;border:1px solid var(--line)}
 .done-box{text-align:center;padding:34px 16px}
 .done-box h2{font-weight:300;color:var(--deep);margin:0 0 6px}
@@ -271,6 +272,7 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
     <div class="row-set"><label><input type="checkbox" id="hideTr"> Hide the transliteration until I tap it</label></div>
     <div class="row-set"><label><input type="checkbox" id="followOn"> Light up each word as he says it</label></div>
     <div class="row-set"><label><input type="checkbox" id="meaningOn"> Show each word’s meaning as he says it</label></div>
+    <div class="row-set">Voice for letter names <select id="voiceSel"></select> <button class="mini" id="voiceTest">▶ Test</button></div>
     <div class="row-set"><button id="resetBtn">Reset my progress</button><span class="small" id="resetMsg"></span></div>
     <div class="sync" id="syncBox">
       <div class="row-set"><b style="font-weight:600">Sync between devices</b></div>
@@ -649,7 +651,11 @@ function pickVoice(){
   if(!("speechSynthesis" in window)){ $("voiceNote").textContent="This browser can't speak, so letter names won't play here."; return }
   const vs=speechSynthesis.getVoices().filter(v=>/^th/i.test(v.lang));
   const score=v=>(/premium|enhanced|natural|neural/i.test(v.name)?3:0)+(/google|kanya|narisa|premwadee|niwat/i.test(v.name)?1:0)+(v.localService?0:0.5);
-  vs.sort((a,b)=>score(b)-score(a)); thVoice=vs[0]||null;
+  vs.sort((a,b)=>score(b)-score(a));
+  const chosen=vs.find(v=>v.name===S.voiceName); thVoice=chosen||vs[0]||null;
+  const sel=$("voiceSel");
+  sel.innerHTML=vs.length?vs.map(v=>`<option value="${v.name}">${v.name}${/online|natural|premium|enhanced/i.test(v.name)?" ★":""}</option>`).join(""):'<option value="">No Thai voice on this device</option>';
+  if(thVoice) sel.value=thVoice.name;
   $("voiceNote").textContent=thVoice?"":(speechSynthesis.getVoices().length?"No Thai voice is installed on this device. On iPhone: Settings › Accessibility › Spoken Content › Voices › Thai.":"");
 }
 if("speechSynthesis" in window){ speechSynthesis.onvoiceschanged=pickVoice; }
@@ -659,6 +665,8 @@ function speak(t){
   speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang="th-TH"; if(thVoice) u.voice=thVoice; u.rate=.8; speechSynthesis.speak(u);
 }
 abcBuild(); pickVoice();
+$("voiceSel").onchange=e=>{S.voiceName=e.target.value;save();pickVoice();speak("สวัสดีครับ เวทนาไม่ใช่กิเลส")};
+$("voiceTest").onclick=()=>speak("สวัสดีครับ วันนี้อากาศดีมาก เวทนาไม่ใช่กิเลส แต่การไม่อยากมีเวทนา คือสิ่งที่เป็นอุปสรรค");
 
 /* ---------- pull down to refresh (phones) ---------- */
 (()=>{ const ptr=$("ptr"); let y0=null,x0=0,d=0;
