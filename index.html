@@ -17,7 +17,8 @@ p,h1,h2,div{text-wrap:pretty}
 .wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px}
 header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
 .brand small{display:block;letter-spacing:.18em;text-transform:uppercase;font-size:11px;color:var(--saffron)}
-.brand h1{margin:2px 0 0;font-size:22px;font-weight:300;color:var(--deep);text-wrap:balance}
+.brand h1{margin:2px 0 0;font-size:22px;font-weight:300;color:var(--deep)}
+.brand h1 .th{white-space:nowrap}
 .stats{display:flex;gap:6px;font-size:13px}
 .pill{padding:5px 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line)}
 .pill b{font-weight:600}
@@ -40,14 +41,14 @@ button:active{transform:scale(.97)}
 button.primary{background:var(--maroon);color:#fff;border-color:var(--maroon)}
 button.ghost{background:transparent}
 button.on{background:#fbefe0;border-color:var(--saffron);color:var(--maroon)}
-.meta{font-size:12px;color:var(--soft);width:100%;text-align:center;margin-top:-2px}
+.meta{font-size:12.5px;color:var(--soft);margin-left:4px}
 .body{padding:14px 18px 4px;min-height:96px}
 .hint{color:var(--soft);font-size:15px;text-align:center;padding:12px 0 4px}
 .flag{font-size:12.5px;color:#8a5a12;background:#fff4dc;border:1px solid #f0d9a8;border-radius:10px;
   padding:6px 10px;margin-bottom:12px}
 .thai{font-family:"Sarabun","Leelawadee UI","Thonburi",Tahoma,sans-serif;font-size:27px;line-height:1.9;color:var(--deep)}
 .tr{font-size:18px;line-height:1.8;margin-top:6px}
-.w{cursor:pointer;border-radius:7px;padding:1px 2px;transition:background .12s}
+.w{cursor:pointer;border-radius:7px;padding:1px 2px;transition:background .12s;white-space:nowrap;display:inline-block}
 .w:hover,.w.sel{background:#fbe9d2}
 .thai .w{margin-right:.18em}
 .tr .w{margin-right:.45em}
@@ -57,10 +58,11 @@ button.on{background:#fbefe0;border-color:var(--saffron);color:var(--maroon)}
   animation:drop .18s ease-out}
 @keyframes drop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 .gloss.show{display:block}
-.ghead{display:flex;align-items:center;gap:8px}
+.ghead{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}
+.gloss .gt{white-space:nowrap}
 .gloss .gt{font-family:"Sarabun","Leelawadee UI",Tahoma,sans-serif;font-size:22px;color:var(--maroon)}
 .gloss .gr{font-size:16.5px}
-.gloss .save{margin-left:auto;font-size:13px;padding:5px 10px}
+.gloss .save{margin-left:auto;font-size:13px;padding:4px 10px;align-self:center}
 .gloss .row{margin-top:3px;font-size:15px;line-height:1.4}
 .gloss .lab{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--saffron);margin-right:6px}
 .gloss .pali{font-style:italic;color:#6b4a2a}
@@ -85,14 +87,18 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
 .done-box h2{font-weight:300;color:var(--deep);margin:0 0 6px}
 @media (max-width:520px){
   .wrap{padding:10px 10px 40px}
-  .stage{--vh:24svh;padding:10px 10px 0}
+  .stage{--vh:17svh;padding:8px 8px 0}
   .thai{font-size:23px;line-height:1.75}.tr{font-size:16px;line-height:1.7}.en{font-size:16.5px}
-  header{margin-bottom:8px;align-items:center}
-  .brand h1{font-size:18px}.brand h1 .sub{display:none}
+  header{margin-bottom:6px;align-items:center}
+  .brand small{display:none}
+  .brand h1{font-size:17px;margin:0}.brand h1 .sub{display:none}
   .stats{font-size:12px;gap:4px}.pill{padding:4px 8px}
-  .controls{padding:8px 10px;gap:6px}.controls button{padding:7px 11px;font-size:15px}
+  .controls{padding:7px 8px;gap:6px}.controls button{padding:6px 10px;font-size:14.5px}
   .body{padding:12px 14px 2px}
-  .rate{padding:6px 10px 12px;gap:6px}
+  .rate{padding:4px 10px 10px;gap:6px}.rate button{padding:6px 2px}
+  .gloss{padding:7px 10px;margin-bottom:6px}.gloss .gt{font-size:20px}.gloss .row{font-size:14px}
+  .reveal{padding:2px 10px 12px}.reveal button{padding:12px}
+  .en{margin-top:6px;padding-top:6px}
 }
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400&display=swap">
@@ -101,7 +107,7 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
 <div class="wrap">
   <header>
     <div class="brand"><small>Talk Cards · Thai</small>
-      <h1>ภาวนาเพื่อเข้าใจเวทนา<span class="sub"><br><span style="font-size:15px;color:var(--soft)">Meditation to understand feeling · Ajahn Jayasaro</span></span></h1></div>
+      <h1><span class="th">ภาวนาเพื่อเข้าใจเวทนา</span><span class="sub"><br><span style="font-size:15px;color:var(--soft)">Meditation to understand feeling · Ajahn Jayasaro</span></span></h1></div>
     <div class="stats">
       <span class="pill new">New <b id="sNew">0</b></span>
       <span class="pill due">Due <b id="sDue">0</b></span>
@@ -272,7 +278,7 @@ function next(){
     $("revealBox").style.display="none"; $("meta").textContent=""; return;
   }
   const s=st(current.id);
-  $("meta").textContent=`Sentence ${current.id} of ${CARDS.length} · ${s.seen?"review":"new"}`;
+  $("meta").textContent=`${current.id} / ${CARDS.length}${s.seen?" · review":""}`;
   $("body").innerHTML=`${current.flag?'<div class="flag">'+current.note+'</div>':''}<div class="hint">Listen, and try to understand before you reveal.</div>`;
   $("revealBox").style.display="block";
   if(S.autoplay) play(current.s,current.e);
