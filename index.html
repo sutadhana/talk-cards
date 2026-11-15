@@ -50,6 +50,10 @@ button.on{background:#fbefe0;border-color:var(--saffron);color:var(--maroon)}
 .tr{font-size:18px;line-height:1.8;margin-top:6px}
 .w{cursor:pointer;border-radius:7px;padding:1px 2px;transition:background .12s;white-space:nowrap;display:inline-block}
 .w:hover,.w.sel{background:#fbe9d2}
+.live{min-height:30px;margin-top:6px;display:flex;align-items:baseline;gap:8px;opacity:0;transition:opacity .15s}
+.live.on{opacity:1}
+.live .lt{font-family:"Sarabun","Leelawadee UI",Tahoma,sans-serif;font-size:17px;color:var(--maroon);white-space:nowrap}
+.live .lm{font-size:15.5px;color:var(--ink);background:#fbefe0;border-radius:8px;padding:2px 8px}
 .w.now{background:#f3cf9c;box-shadow:0 0 0 2px #f3cf9c;transition:background .08s}
 .thai .w{margin-right:.18em}
 .tr .w{margin-right:.45em}
@@ -220,7 +224,7 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
     <div class="row-set"><label><input type="checkbox" id="autoplay"> Play the clip automatically on each card</label></div>
     <div class="row-set"><label><input type="checkbox" id="replayReveal"> Play the clip again when I press Show answer</label></div>
     <div class="row-set"><label><input type="checkbox" id="hideTr"> Hide the transliteration until I tap it</label></div>
-    <div class="row-set"><label><input type="checkbox" id="followOn"> Light up each word as he says it</label></div>
+    <div class="row-set"><label><input type="checkbox" id="followOn"> Light up each word as he says it, with its meaning</label></div>
     <div class="row-set"><button id="resetBtn">Reset my progress</button><span class="small" id="resetMsg"></span></div>
     <div class="sync" id="syncBox">
       <div class="row-set"><b style="font-weight:600">Sync between devices</b></div>
@@ -399,11 +403,14 @@ $("slow").onclick=()=>{rate=rate===1?.75:1;$("slow").classList.toggle("on",rate!
 /* ---------- follow along: light up the word being spoken ---------- */
 let nowI=-2;
 function follow(t){
+  if(t<0&&$("live")){ document.querySelectorAll(".w.now").forEach(x=>x.classList.remove("now")); nowI=-2; return }
   if(!revealed||!cur||!cur.c.wt||S.follow===false){ if(nowI!==-2){document.querySelectorAll(".w.now").forEach(x=>x.classList.remove("now")); nowI=-2} return }
   const wt=cur.c.wt; let i=-1;
   if(t>=0) for(let k=0;k<wt.length;k++){ if(wt[k]!=null&&wt[k]<=t+0.05) i=k }
   if(i===nowI) return; nowI=i;
   document.querySelectorAll("#body .w").forEach(x=>x.classList.toggle("now",+x.dataset.i===i));
+  const lv=$("live"); if(lv){ const w=cur.c.t[i];
+    lv.innerHTML=w?`<span class="lt">${w[0]}</span><span class="lm">${w[3]||w[2]}</span>`:""; lv.classList.toggle("on",!!w) }
 }
 
 /* ---------- history (Previous) ---------- */
@@ -464,7 +471,7 @@ function show(fromPrev){
   }
   $("body").innerHTML=`${c.note?'<div class="flag">'+c.note+'</div>':''}${top}
     <div class="gloss" id="gloss"></div><div class="thai${cur.type==="w"?" small":""}">${thai}</div>${trLine(c)}
-    <div class="en">${c.en}</div>`;
+    ${c.wt&&S.follow!==false?'<div class="live" id="live"></div>':''}<div class="en">${c.en}</div>`;
   if(cur.type==="w") $("body").querySelectorAll(".thai .w").forEach(el=>{ if(c.t[+el.dataset.i][0]===cur.w[0]) el.classList.add("hlw") });
   $("body").querySelectorAll(".w").forEach(el=>el.onclick=()=>gloss(+el.dataset.i));
   if($("trShow")) $("trShow").onclick=()=>$("trBox").classList.remove("trhid");
