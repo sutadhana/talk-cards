@@ -299,9 +299,13 @@ window.onYouTubeIframeAPIReady=()=>{
 };
 function play(s,e){
   if(!ready)return;
+  /* On phones the reported time can lag behind a seek, so only start watching for the
+     end once playback is really inside this clip (or after 3 s as a safety net). */
   player.setPlaybackRate(rate); player.seekTo(s,true); player.playVideo(); stopAt=e;
-  clearInterval(timer);
-  timer=setInterval(()=>{ if(player.getCurrentTime()>=stopAt){player.pauseVideo();clearInterval(timer)} },80);
+  clearInterval(timer); const t0=Date.now(); let armed=false;
+  timer=setInterval(()=>{ const t=player.getCurrentTime();
+    if(!armed){ if((t>=s-0.6&&t<e-0.05)||Date.now()-t0>3000) armed=true; else return; }
+    if(t>=stopAt){player.pauseVideo();clearInterval(timer)} },80);
 }
 const playCur=()=>cur&&play(cur.c.s,cur.c.e);
 const $=id=>document.getElementById(id);
