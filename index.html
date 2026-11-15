@@ -670,11 +670,16 @@ async function push(){
 }
 onSave=()=>{ if(!SY.user) return; clearTimeout(SY.timer); SY.timer=setTimeout(push,1200) };
 $("signIn").onclick=async()=>{
-  try{ const {auth,au}=await fbLoad(); try{localStorage.setItem("tc:sync","1")}catch(e){}
-    try{ await auth.signInWithPopup(au,new auth.GoogleAuthProvider()) }
-    catch(e){ if(/popup/.test(e.code||"")) await auth.signInWithRedirect(au,new auth.GoogleAuthProvider()); else throw e }
-  }catch(e){ $("syncOut").querySelector(".small").textContent="Sign-in didn't work. Please try again." }
+  const msg=t=>{$("syncOut").querySelector(".small").textContent=t};
+  try{ const {auth,au}=await fbLoad(); msg("Opening Google sign-in…");
+    await auth.signInWithPopup(au,new auth.GoogleAuthProvider());
+  }catch(e){ const c=e&&e.code||"";
+    if(/popup-blocked/.test(c)) msg("Your browser blocked the sign-in window. Allow pop-ups for this site, then tap the button again.");
+    else if(/popup-closed|cancelled-popup/.test(c)) msg("The sign-in window was closed before finishing. Tap the button to try again.");
+    else msg("Sign-in didn't work ("+(c||(e&&e.message)||"unknown")+"). Please try again.");
+  }
 };
+fbLoad().then(({auth,au})=>auth.getRedirectResult(au)).catch(()=>{});
 $("signOut").onclick=async()=>{ try{localStorage.removeItem("tc:sync")}catch(e){} if(SY.fb) await SY.fb.auth.signOut(SY.fb.au); SY.user=null; syncUI() };
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") pull() });
 fbLoad().catch(()=>{});
