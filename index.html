@@ -436,7 +436,6 @@ $("prev").onclick=()=>{
 /* ---------- card flow ---------- */
 function stats(){
   const q=queue(); $("sNew").textContent=q.allNew; $("sDue").textContent=q.due.length;
-  $("spNew").textContent=q.fresh.length; $("spDue").textContent=q.due.length;
   startPanel();
   $("sDone").textContent=items().filter(it=>st(it.key).seen&&st(it.key).ivl>=1).length;
 }
