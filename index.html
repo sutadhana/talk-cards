@@ -90,6 +90,7 @@ button:disabled{opacity:.4;cursor:default}
 .mini{font-size:12px;padding:3px 8px;margin-left:6px}
 .card.swl{animation:swl .25s}.card.swr{animation:swr .25s}
 @keyframes swl{30%{transform:translateX(-14px)}}@keyframes swr{30%{transform:translateX(14px)}}
+.sync{border-top:1px solid var(--line);margin-top:12px;padding-top:6px}
 .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
 nav.tabs{display:flex;gap:6px;margin:18px 0 10px}
 .panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:none}
@@ -177,7 +178,11 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
     <div class="row-set"><label><input type="checkbox" id="replayReveal"> Play the clip again when I press Show answer</label></div>
     <div class="row-set"><label><input type="checkbox" id="hideTr"> Hide the transliteration until I tap it</label></div>
     <div class="row-set"><button id="resetBtn">Reset my progress</button><span class="small" id="resetMsg"></span></div>
-    <p class="small">Progress is kept in this browser on this device.</p>
+    <div class="sync" id="syncBox">
+      <div class="row-set"><b style="font-weight:600">Sync between devices</b></div>
+      <div class="row-set" id="syncOut"><button id="signIn">Sign in with Google</button><span class="small">Sign in on each device and your progress follows you.</span></div>
+      <div class="row-set" id="syncIn" style="display:none"><span>Synced as <b id="syncWho" style="font-weight:600"></b></span><span class="small" id="syncSt"></span><button class="mini" id="signOut">Sign out</button></div>
+    </div>
   </div>
 </div>
 
@@ -442,6 +447,53 @@ $("resetBtn").onclick=()=>{ if($("resetBtn").dataset.sure){S.cards={};S.newToday
 document.querySelector('[data-p="pAll"]').addEventListener("click",renderAll);
 function refreshAll(){norm();syncSettings();renderWords();stats();}
 refreshAll(); updPrev();
+
+/* ---------- sync (Firebase, project suta-dhana) ---------- */
+const FB_CFG={apiKey:"AIzaSyBAu6MDsABBSFzXErsd2cjEMkRO-jyYW5o",authDomain:"suta-dhana.firebaseapp.com",projectId:"suta-dhana",storageBucket:"suta-dhana.firebasestorage.app",messagingSenderId:"835596158374",appId:"1:835596158374:web:64c8cec32920eb1e9bbb67"};
+const FBV="https://www.gstatic.com/firebasejs/10.12.2/";
+const SY={fb:null,user:null,timer:null};
+async function fbLoad(){
+  if(SY.fb) return SY.fb;
+  const [app,auth,fs]=await Promise.all([import(FBV+"firebase-app.js"),import(FBV+"firebase-auth.js"),import(FBV+"firebase-firestore.js")]);
+  const a=app.initializeApp(FB_CFG,"talkcards"), au=auth.getAuth(a), db=fs.getFirestore(a);
+  SY.fb={auth,au,fs,db};
+  auth.onAuthStateChanged(au,u=>{SY.user=u; syncUI(); if(u) pull(true)});
+  return SY.fb;
+}
+function syncUI(){
+  $("syncOut").style.display=SY.user?"none":"flex"; $("syncIn").style.display=SY.user?"flex":"none";
+  if(SY.user) $("syncWho").textContent=SY.user.email||"your account";
+}
+const stSet=t=>{$("syncSt").textContent=t};
+async function pull(first){
+  if(!SY.user) return;
+  const {fs,db}=SY.fb;
+  try{
+    const snap=await fs.getDoc(fs.doc(db,"talkcards",SY.user.uid));
+    const r=snap.exists()?JSON.parse(snap.data().data||"{}"):null;
+    if(r&&(r.updated||0)>(S.updated||0)){
+      const words=[...(r.words||[])]; for(const w of S.words) if(!words.some(x=>x[0]===w[0]&&x[2]===w[2])) words.push(w);
+      S=r; S.words=words; try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+      refreshAll(); if(started&&!revealed) next(); stSet("· up to date");
+    } else if(!r||(S.updated||0)>(r.updated||0)) push(); else stSet("· up to date");
+  }catch(e){stSet("· couldn't reach the server")}
+}
+async function push(){
+  if(!SY.user) return;
+  const {fs,db}=SY.fb;
+  try{await fs.setDoc(fs.doc(db,"talkcards",SY.user.uid),{data:JSON.stringify(S),updated:S.updated||Date.now(),email:SY.user.email||""});stSet("· saved")}
+  catch(e){stSet("· will retry")}
+}
+onSave=()=>{ if(!SY.user) return; clearTimeout(SY.timer); SY.timer=setTimeout(push,1200) };
+$("signIn").onclick=async()=>{
+  try{ const {auth,au}=await fbLoad(); try{localStorage.setItem("tc:sync","1")}catch(e){}
+    try{ await auth.signInWithPopup(au,new auth.GoogleAuthProvider()) }
+    catch(e){ if(/popup/.test(e.code||"")) await auth.signInWithRedirect(au,new auth.GoogleAuthProvider()); else throw e }
+  }catch(e){ $("syncOut").querySelector(".small").textContent="Sign-in didn't work. Please try again." }
+};
+$("signOut").onclick=async()=>{ try{localStorage.removeItem("tc:sync")}catch(e){} if(SY.fb) await SY.fb.auth.signOut(SY.fb.au); SY.user=null; syncUI() };
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") pull() });
+fbLoad().catch(()=>{});
 </script>
 </body>
 </html>
