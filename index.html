@@ -128,6 +128,31 @@ html,body{overscroll-behavior-y:contain}
 .tpos span{font-size:12.5px;color:var(--soft);white-space:nowrap}
 .talk #prev,.talk .rate{display:none!important}
 #tMark.on{background:#fbefe0;border-color:var(--saffron);color:var(--maroon)}
+.abc{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:14px 14px 10px;margin-top:14px}
+.abc-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.abc-h b{font-weight:600;color:var(--deep);font-size:17px}
+.abc-sec{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--saffron);margin:14px 0 6px;display:flex;justify-content:space-between;align-items:center}
+.cls{letter-spacing:0;text-transform:none;font-size:12px;color:var(--soft)}
+.cls i{display:inline-block;width:9px;height:9px;border-radius:3px;margin:0 4px 0 8px;vertical-align:middle}
+.k-m{background:#e9e1d3}.k-h{background:#f6d9c4}.k-l{background:#dfe6ef}
+.abc-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+.lt{display:flex;flex-direction:column;align-items:center;padding:5px 2px 4px;border-radius:10px;border:1px solid transparent;background:#f7f2e9;line-height:1.1}
+.lt.c-m{background:#f2ece1}.lt.c-h{background:#fbeadd}.lt.c-l{background:#ebf0f6}
+.lt .g{font-family:"Sarabun","Leelawadee UI",Tahoma,sans-serif;font-size:24px;color:var(--deep);line-height:1.35}
+.lt .n{font-size:10.5px;color:var(--soft);white-space:nowrap}
+.lt.hit{background:#f3cf9c;border-color:#c8792b;box-shadow:0 2px 8px -4px rgba(125,46,36,.6)}
+.lt.hit .g{color:var(--maroon)}
+.lt.say{animation:pulse .5s}
+@keyframes pulse{40%{transform:scale(1.12)}}
+.spell{min-height:44px;margin-top:8px;padding:8px 10px;border-radius:12px;background:#fbf4e8;border:1px solid #f0e2c9;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.spell .sw{font-family:"Sarabun","Leelawadee UI",Tahoma,sans-serif;font-size:22px;color:var(--maroon);margin-right:6px}
+.spell .ch{font-family:"Sarabun","Leelawadee UI",Tahoma,sans-serif;font-size:20px;min-width:36px;padding:2px 8px;border-radius:9px;background:#fff;border:1px solid var(--line)}
+@media (min-width:1100px){
+  .wrap{max-width:1180px;display:grid;grid-template-columns:minmax(0,1fr) 370px;column-gap:24px;align-items:start}
+  .wrap>*{grid-column:1}
+  .wrap>.abc{grid-column:2;grid-row:1 / span 12;margin-top:0;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}
+}
+@media (max-width:520px){.abc-grid{gap:4px}.lt .g{font-size:22px}.lt .n{font-size:9.5px}}
 .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
 nav.tabs{display:flex;gap:6px;margin:18px 0 10px}
 .panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:none}
@@ -211,6 +236,18 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
     </div>
   </div>
 
+
+  <aside class="abc" id="abc">
+    <div class="abc-h"><b>Thai alphabet</b><span class="small">Tap a letter to hear its name</span></div>
+    <div class="spell" id="spell"><span class="small">Tap a word in the sentence to see its letters here.</span></div>
+    <div class="abc-sec">Consonants <span class="cls"><i class="k-m"></i>mid <i class="k-h"></i>high <i class="k-l"></i>low</span></div>
+    <div class="abc-grid" id="abcC"></div>
+    <div class="abc-sec">Vowels</div>
+    <div class="abc-grid" id="abcV"></div>
+    <div class="abc-sec">Tone marks and signs</div>
+    <div class="abc-grid" id="abcM"></div>
+    <p class="small" id="voiceNote"></p>
+  </aside>
   <div class="legend">
     <span><i style="background:var(--t-mid)"></i>mid</span>
     <span><i style="background:var(--t-low)"></i>low ( ` )</span>
@@ -444,7 +481,7 @@ function setMeta(){
   $("meta").textContent=cur.type==="w"?`word · ${cur.c.id}/${CARDS.length}`:`${cur.c.id} / ${CARDS.length}${s.seen?" · review":""}`;
 }
 function next(){
-  const q=queue(); cur=q.due[0]||q.fresh[0]||null; revealed=false; openW=-1;
+  const q=queue(); cur=q.due[0]||q.fresh[0]||null; revealed=false; openW=-1; abcWord(null);
   stats(); $("rateBox").style.display="none";
   if(!cur){
     $("body").innerHTML=`<div class="done-box"><h2>Sādhu, all done for today</h2><p class="small">Come back tomorrow for the cards that are due.<br>You can raise the number of new cards in Settings.</p></div>`;
@@ -467,7 +504,7 @@ function trLine(c){
   return S.hideTr?`<div class="tr trhid" id="trBox"><button class="trshow" id="trShow">Show transliteration</button><span class="trin">${tr}</span></div>`:`<div class="tr">${tr}</div>`;
 }
 function show(fromPrev){
-  revealed=true; openW=-1; nowI=-2; const c=cur.c;
+  revealed=true; openW=-1; nowI=-2; abcWord(null); const c=cur.c;
   const thai=c.t.map((w,i)=>`<span class="w" data-i="${i}">${w[0]}</span>`).join("");
   let top="";
   if(cur.type==="w"){
@@ -479,7 +516,7 @@ function show(fromPrev){
   }
   $("body").innerHTML=`${c.note?'<div class="flag">'+c.note+'</div>':''}${top}
     <div class="gloss" id="gloss"></div><div class="thai${cur.type==="w"?" small":""}">${thai}</div>${trLine(c)}
-    ${c.wt&&S.follow!==false&&S.liveMeaning!==false?'<div class="live" id="live"></div>':''}<div class="en">${c.en}</div>`;
+    ${c.wt&&S.follow!==false&&S.liveMeaning===true?'<div class="live" id="live"></div>':''}<div class="en">${c.en}</div>`;
   if(cur.type==="w") $("body").querySelectorAll(".thai .w").forEach(el=>{ if(c.t[+el.dataset.i][0]===cur.w[0]) el.classList.add("hlw") });
   $("body").querySelectorAll(".w").forEach(el=>el.onclick=()=>gloss(+el.dataset.i));
   if($("trShow")) $("trShow").onclick=()=>$("trBox").classList.remove("trhid");
@@ -490,7 +527,7 @@ function show(fromPrev){
 let openW=-1;
 function gloss(i,keep){
   const w=cur.c.t[i], g=$("gloss");
-  if(openW===i&&!keep){g.classList.remove("show");openW=-1;$("body").querySelectorAll(".w").forEach(el=>el.classList.remove("sel"));return}
+  if(openW===i&&!keep){g.classList.remove("show");openW=-1;$("body").querySelectorAll(".w").forEach(el=>el.classList.remove("sel"));abcWord(null);return}
   openW=i;
   $("body").querySelectorAll(".w").forEach(el=>el.classList.toggle("sel",+el.dataset.i===i));
   const saved=S.words.some(x=>x[0]===w[0]&&x[2]===w[2]);
@@ -499,7 +536,7 @@ function gloss(i,keep){
     <div class="row"><span class="lab">Dictionary</span>${w[2]}</div>
     ${w[3]&&w[3]!==w[2]?`<div class="row"><span class="lab">Here</span>${w[3]}</div>`:""}
     ${w[4]?`<div class="row"><span class="lab">Pāli</span><span class="pali">${w[4]}</span></div>`:""}`;
-  g.classList.add("show");
+  g.classList.add("show"); abcWord(w[0]);
   $("saveW").onclick=()=>{ if(!saved){S.words.push([...w,cur.c.id]);save();gloss(i,true);renderWords();stats()} };
 }
 function rateCard(q){
@@ -560,7 +597,7 @@ document.querySelectorAll("#modes button").forEach(b=>b.onclick=()=>{
 $("tPos").max=CARDS.length;
 function showTalk(i){
   i=Math.max(0,Math.min(CARDS.length-1,i)); S.pos=i; save();
-  const c=CARDS[i]; cur={key:"s"+c.id,type:"s",c}; revealed=false; openW=-1;
+  const c=CARDS[i]; cur={key:"s"+c.id,type:"s",c}; revealed=false; openW=-1; abcWord(null);
   $("rateBox").style.display="none";
   $("body").innerHTML=`${c.flag?'<div class="flag">'+c.note+'</div>':''}<div class="hint">Listen, and try to understand before you reveal.</div>`;
   $("revealBox").style.display="block";
@@ -585,6 +622,43 @@ $("tNext").onclick=()=>{
 $("tPos").oninput=()=>{$("tPosLab").textContent=`${$("tPos").value} / ${CARDS.length}`};
 $("tPos").onchange=()=>showTalk(+$("tPos").value-1);
 modeUI();
+
+
+/* ---------- Thai alphabet panel ---------- */
+const ABC={"c": [["ก", "กอ ไก่", "gor gài", "m"], ["ข", "ขอ ไข่", "kŏr kài", "h"], ["ฃ", "ขอ ขวด", "kŏr kùuat", "h"], ["ค", "คอ ควาย", "kor kwaai", "l"], ["ฅ", "คอ คน", "kor kon", "l"], ["ฆ", "ฆอ ระฆัง", "kor rá-kang", "l"], ["ง", "งอ งู", "ngor ngoo", "l"], ["จ", "จอ จาน", "jor jaan", "m"], ["ฉ", "ฉอ ฉิ่ง", "chŏr chìng", "h"], ["ช", "ชอ ช้าง", "chor cháang", "l"], ["ซ", "ซอ โซ่", "sor sôh", "l"], ["ฌ", "ฌอ เฌอ", "chor chur", "l"], ["ญ", "ยอ หญิง", "yor yĭng", "l"], ["ฎ", "ดอ ชฎา", "dor chá-daa", "m"], ["ฏ", "ตอ ปฏัก", "dtor bpà-dtàk", "m"], ["ฐ", "ถอ ฐาน", "tŏr tăan", "h"], ["ฑ", "ทอ มณโฑ", "tor mon-toh", "l"], ["ฒ", "ทอ ผู้เฒ่า", "tor pôo-tâo", "l"], ["ณ", "นอ เณร", "nor nayn", "l"], ["ด", "ดอ เด็ก", "dor dèk", "m"], ["ต", "ตอ เต่า", "dtor dtào", "m"], ["ถ", "ถอ ถุง", "tŏr tŭng", "h"], ["ท", "ทอ ทหาร", "tor tá-hăan", "l"], ["ธ", "ทอ ธง", "tor tong", "l"], ["น", "นอ หนู", "nor nŏo", "l"], ["บ", "บอ ใบไม้", "bor bai-máai", "m"], ["ป", "ปอ ปลา", "bpor bplaa", "m"], ["ผ", "ผอ ผึ้ง", "pŏr pêung", "h"], ["ฝ", "ฝอ ฝา", "fŏr făa", "h"], ["พ", "พอ พาน", "por paan", "l"], ["ฟ", "ฟอ ฟัน", "for fan", "l"], ["ภ", "พอ สำเภา", "por săm-pao", "l"], ["ม", "มอ ม้า", "mor máa", "l"], ["ย", "ยอ ยักษ์", "yor yák", "l"], ["ร", "รอ เรือ", "ror reuua", "l"], ["ล", "ลอ ลิง", "lor ling", "l"], ["ว", "วอ แหวน", "wor wăen", "l"], ["ศ", "สอ ศาลา", "sŏr săa-laa", "h"], ["ษ", "สอ ฤๅษี", "sŏr reu-sĕe", "h"], ["ส", "สอ เสือ", "sŏr sĕuua", "h"], ["ห", "หอ หีบ", "hŏr hèep", "h"], ["ฬ", "ลอ จุฬา", "lor jù-laa", "l"], ["อ", "ออ อ่าง", "or àang", "m"], ["ฮ", "ฮอ นกฮูก", "hor nók-hôok", "l"]], "v": [["ะ", "สระอะ", "a"], ["ั", "ไม้หันอากาศ", "a"], ["า", "สระอา", "aa"], ["ำ", "สระอำ", "am"], ["ิ", "สระอิ", "i"], ["ี", "สระอี", "ee"], ["ึ", "สระอึ", "eu"], ["ื", "สระอือ", "euu"], ["ุ", "สระอุ", "u"], ["ู", "สระอู", "oo"], ["เ", "สระเอ", "ay"], ["แ", "สระแอ", "ae"], ["โ", "สระโอ", "oh"], ["ใ", "สระใอไม้ม้วน", "ai"], ["ไ", "สระไอไม้มลาย", "ai"], ["ฤ", "ตัวรึ", "reu"]], "m": [["่", "ไม้เอก", "mái àyk"], ["้", "ไม้โท", "mái toh"], ["๊", "ไม้ตรี", "mái dtree"], ["๋", "ไม้จัตวา", "mái jàt-dtà-waa"], ["็", "ไม้ไต่คู้", "short vowel"], ["์", "การันต์", "silent"], ["ๆ", "ไม้ยมก", "repeat"], ["ฯ", "ไปยาลน้อย", "abbrev."]]};
+const ring=ch=>/[ัิ-ฺ็-๎]/.test(ch)?"◌"+ch:ch;
+function abcBuild(){
+  $("abcC").innerHTML=ABC.c.map(([ch,nm,tr,k])=>`<button class="lt c-${k}" data-ch="${ch}" data-say="${nm}" title="${nm}"><span class="g">${ch}</span><span class="n">${tr}</span></button>`).join("");
+  $("abcV").innerHTML=ABC.v.map(([ch,nm,tr])=>`<button class="lt" data-ch="${ch}" data-say="${nm}" title="${nm}"><span class="g">${ring(ch)}</span><span class="n">${tr}</span></button>`).join("");
+  $("abcM").innerHTML=ABC.m.map(([ch,nm,tr])=>`<button class="lt" data-ch="${ch}" data-say="${nm}" title="${nm}"><span class="g">${ring(ch)}</span><span class="n">${tr}</span></button>`).join("");
+  document.querySelectorAll("#abc .lt").forEach(b=>b.onclick=()=>sayTile(b));
+}
+const nameOf=ch=>{for(const g of [ABC.c,ABC.v,ABC.m]) for(const r of g) if(r[0]===ch) return r[1]; return null};
+function sayTile(b){ b.classList.remove("say"); void b.offsetWidth; b.classList.add("say"); speak(b.dataset.say) }
+function abcWord(w){
+  document.querySelectorAll("#abc .lt.hit").forEach(x=>x.classList.remove("hit"));
+  if(!w){ $("spell").innerHTML='<span class="small">Tap a word in the sentence to see its letters here.</span>'; return }
+  const chars=[...w].filter(ch=>ch.trim());
+  chars.forEach(ch=>document.querySelectorAll(`#abc .lt[data-ch="${ch}"]`).forEach(x=>x.classList.add("hit")));
+  $("spell").innerHTML=`<span class="sw">${w}</span>`+chars.map(ch=>{const n=nameOf(ch); return `<button class="ch" ${n?`data-say="${n}"`:"disabled"}>${ring(ch)}</button>`}).join("");
+  $("spell").querySelectorAll(".ch[data-say]").forEach(b=>b.onclick=()=>speak(b.dataset.say));
+}
+/* speech: the device's own Thai voice, preferring the most natural one installed */
+let thVoice=null;
+function pickVoice(){
+  if(!("speechSynthesis" in window)){ $("voiceNote").textContent="This browser can't speak, so letter names won't play here."; return }
+  const vs=speechSynthesis.getVoices().filter(v=>/^th/i.test(v.lang));
+  const score=v=>(/premium|enhanced|natural|neural/i.test(v.name)?3:0)+(/google|kanya|narisa|premwadee|niwat/i.test(v.name)?1:0)+(v.localService?0:0.5);
+  vs.sort((a,b)=>score(b)-score(a)); thVoice=vs[0]||null;
+  $("voiceNote").textContent=thVoice?"":(speechSynthesis.getVoices().length?"No Thai voice is installed on this device. On iPhone: Settings › Accessibility › Spoken Content › Voices › Thai.":"");
+}
+if("speechSynthesis" in window){ speechSynthesis.onvoiceschanged=pickVoice; }
+function speak(t){
+  if(!("speechSynthesis" in window)) return;
+  try{ if(ready&&player.getPlayerState()===1) player.pauseVideo() }catch(e){}
+  speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang="th-TH"; if(thVoice) u.voice=thVoice; u.rate=.8; speechSynthesis.speak(u);
+}
+abcBuild(); pickVoice();
 
 /* ---------- pull down to refresh (phones) ---------- */
 (()=>{ const ptr=$("ptr"); let y0=null,x0=0,d=0;
@@ -619,7 +693,7 @@ function renderAll(){
 }
 function syncSettings(){
   $("newPerDay").value=S.newPerDay; $("autoplay").checked=S.autoplay;
-  $("replayReveal").checked=S.replayOnReveal; $("hideTr").checked=S.hideTr; $("followOn").checked=S.follow!==false; $("meaningOn").checked=S.liveMeaning!==false;
+  $("replayReveal").checked=S.replayOnReveal; $("hideTr").checked=S.hideTr; $("followOn").checked=S.follow!==false; $("meaningOn").checked=S.liveMeaning===true;
 }
 $("newPerDay").onchange=e=>{S.newPerDay=Math.max(1,+e.target.value||10);save();stats()};
 $("autoplay").onchange=e=>{S.autoplay=e.target.checked;save()};
