@@ -18,7 +18,7 @@ p,h1,h2,div{text-wrap:pretty}
 header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
 .brand small{display:block;letter-spacing:.18em;text-transform:uppercase;font-size:11px;color:var(--saffron)}
 .brand h1{margin:2px 0 0;font-size:22px;font-weight:300;color:var(--deep)}
-.brand h1 .th{white-space:nowrap}
+.brand h1 .th{white-space:nowrap;font-family:"Sarabun","Leelawadee UI",Tahoma,sans-serif}
 .stats{display:flex;gap:6px;font-size:13px}
 .pill{padding:5px 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line)}
 .pill b{font-weight:600}
@@ -62,7 +62,7 @@ button.on{background:#fbefe0;border-color:var(--saffron);color:var(--maroon)}
 .gloss .gt{white-space:nowrap}
 .gloss .gt{font-family:"Sarabun","Leelawadee UI",Tahoma,sans-serif;font-size:22px;color:var(--maroon)}
 .gloss .gr{font-size:16.5px}
-.gloss .save{margin-left:auto;font-size:13px;padding:4px 10px;align-self:center}
+.gloss .save{margin-left:auto;font-size:16px;line-height:1;padding:5px 9px;align-self:center;color:var(--saffron)}
 .gloss .row{margin-top:3px;font-size:15px;line-height:1.4}
 .gloss .lab{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--saffron);margin-right:6px}
 .gloss .pali{font-style:italic;color:#6b4a2a}
@@ -302,7 +302,7 @@ function gloss(i,keep){
   $("body").querySelectorAll(".w").forEach(el=>el.classList.toggle("sel",+el.dataset.i===i));
   const saved=S.words.some(x=>x[0]===w[0]&&x[2]===w[2]);
   g.innerHTML=`<div class="ghead"><span class="gt">${w[0]}</span><span class="gr">${colorTr(w[1])}</span>
-    <button class="save" id="saveW">${saved?"★ Saved":"☆ Save"}</button></div>
+    <button class="save" id="saveW" title="Save word">${saved?"★":"☆"}</button></div>
     <div class="row"><span class="lab">Dictionary</span>${w[2]}</div>
     ${w[3]&&w[3]!==w[2]?`<div class="row"><span class="lab">Here</span>${w[3]}</div>`:""}
     ${w[4]?`<div class="row"><span class="lab">Pāli</span><span class="pali">${w[4]}</span></div>`:""}`;
