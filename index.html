@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talk Cards · Thai with Ajahn Jayasaro</title>
+<style>
+:root{
+  --bg:#f6f1e7; --paper:#fffdf8; --ink:#2b2420; --soft:#7a6c60; --line:#e6dccb;
+  --saffron:#c8792b; --maroon:#7d2e24; --deep:#3b2a22;
+  --t-mid:#5b6470; --t-low:#2f6db5; --t-fall:#b3402f; --t-high:#2e8b57; --t-rise:#8a4fb8;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Calibri Light",Calibri,"Segoe UI",system-ui,sans-serif;font-weight:300}
+p,h1,h2,div{text-wrap:pretty}
+.wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
+.brand small{display:block;letter-spacing:.18em;text-transform:uppercase;font-size:11px;color:var(--saffron)}
+.brand h1{margin:2px 0 0;font-size:22px;font-weight:300;color:var(--deep);text-wrap:balance}
+.stats{display:flex;gap:6px;font-size:13px}
+.pill{padding:5px 10px;border-radius:999px;background:var(--paper);border:1px solid var(--line)}
+.pill b{font-weight:600}
+.pill.new b{color:var(--t-low)} .pill.due b{color:var(--t-fall)} .pill.done b{color:var(--t-high)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  box-shadow:0 1px 0 #fff inset,0 18px 40px -28px rgba(80,40,10,.45)}
+.video{position:relative;aspect-ratio:16/9;background:#1c1512}
+.video #player,.video iframe{position:absolute;inset:0;width:100%;height:100%}
+.shade{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 45%,rgba(200,121,43,.25),rgba(20,12,8,.92));color:#f6e9d6;
+  text-align:center;padding:20px;z-index:3}
+.shade h2{font-weight:300;font-size:22px;margin:0 0 6px;text-wrap:balance}
+.shade p{margin:0 0 16px;opacity:.8;font-size:15px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);align-items:center}
+button{font:inherit;cursor:pointer;border-radius:12px;border:1px solid var(--line);background:#fff;
+  padding:9px 14px;color:var(--ink);transition:transform .08s,background .15s}
+button:active{transform:scale(.97)}
+button.primary{background:var(--maroon);color:#fff;border-color:var(--maroon)}
+button.ghost{background:transparent}
+button.on{background:#fbefe0;border-color:var(--saffron);color:var(--maroon)}
+.meta{margin-left:auto;font-size:12px;color:var(--soft)}
+.body{padding:18px 18px 8px;min-height:120px}
+.hint{color:var(--soft);font-size:15px;text-align:center;padding:16px 0 6px}
+.flag{font-size:12.5px;color:#8a5a12;background:#fff4dc;border:1px solid #f0d9a8;border-radius:10px;
+  padding:6px 10px;margin-bottom:12px}
+.thai{font-family:"Sarabun","Leelawadee UI","Thonburi",Tahoma,sans-serif;font-size:27px;line-height:1.9;color:var(--deep)}
+.tr{font-size:18px;line-height:1.8;margin-top:6px}
+.w{cursor:pointer;border-radius:7px;padding:1px 2px;transition:background .12s}
+.w:hover,.w.sel{background:#fbe9d2}
+.thai .w{margin-right:.18em}
+.tr .w{margin-right:.45em}
+.syl{white-space:nowrap}
+.en{font-size:18px;color:var(--soft);margin:12px 0 4px;border-top:1px dashed var(--line);padding-top:12px}
+.gloss{margin:12px 0 4px;padding:12px 14px;border-radius:14px;background:#fbf4e8;border:1px solid #f0e2c9;display:none}
+.gloss.show{display:block}
+.gloss .gt{font-family:"Sarabun","Leelawadee UI",Tahoma,sans-serif;font-size:24px;color:var(--maroon)}
+.gloss .gr{font-size:17px;margin-left:8px}
+.gloss .row{margin-top:6px;font-size:15.5px;line-height:1.45}
+.gloss .lab{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--saffron);display:block}
+.gloss .pali{font-style:italic;color:#6b4a2a}
+.gloss .save{margin-top:8px;font-size:13px;padding:6px 10px}
+.rate{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 14px 16px}
+.rate button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px}
+.rate small{font-size:11.5px;color:var(--soft)}
+.r-again{border-color:#e9b9b0} .r-hard{border-color:#efd3a6} .r-good{border-color:#b9dbc4} .r-easy{border-color:#b8cbe8}
+.reveal{padding:4px 14px 18px}
+.reveal button{width:100%;padding:14px;font-size:17px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12.5px;color:var(--soft);margin:14px 2px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+nav.tabs{display:flex;gap:6px;margin:18px 0 10px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:none}
+.panel.show{display:block}
+.list-item{padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.list-item:last-child{border:0}
+.list-item .th{font-family:"Sarabun","Leelawadee UI",Tahoma,sans-serif;font-size:19px}
+.small{font-size:13px;color:var(--soft)}
+.row-set{display:flex;align-items:center;gap:10px;margin:8px 0;flex-wrap:wrap}
+input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;border:1px solid var(--line)}
+.done-box{text-align:center;padding:34px 16px}
+.done-box h2{font-weight:300;color:var(--deep);margin:0 0 6px}
+@media (max-width:520px){
+  .thai{font-size:24px}.tr{font-size:16.5px}.brand h1{font-size:19px}
+  header{flex-direction:column;align-items:flex-start}
+}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400&display=swap">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><small>Talk Cards · Thai</small>
+      <h1>ภาวนาเพื่อเข้าใจเวทนา<br><span style="font-size:15px;color:var(--soft)">Meditation to understand feeling · Ajahn Jayasaro</span></h1></div>
+    <div class="stats">
+      <span class="pill new">New <b id="sNew">0</b></span>
+      <span class="pill due">Due <b id="sDue">0</b></span>
+      <span class="pill done">Learned <b id="sDone">0</b></span>
+    </div>
+  </header>
+
+  <div class="card" id="card">
+    <div class="video"><div id="player"></div>
+      <div class="shade" id="shade"><div><h2>Ready when you are</h2><p>Each card plays Ajahn Jayasaro saying one sentence.<br>Listen first, then reveal.</p>
+        <button class="primary" id="startBtn">Start session</button></div></div>
+    </div>
+    <div class="controls">
+      <button id="replay">↻ Replay</button>
+      <button id="slow">0.75×</button>
+      <button id="ctx" title="Play a little before and after">Wider context</button>
+      <span class="meta" id="meta"></span>
+    </div>
+    <div class="body" id="body"><div class="hint">Listen, and try to understand before you reveal.</div></div>
+    <div class="reveal" id="revealBox"><button class="primary" id="reveal">Show answer</button></div>
+    <div class="rate" id="rateBox" style="display:none">
+      <button class="r-again" data-q="0">Again<small id="i0"></small></button>
+      <button class="r-hard" data-q="1">Hard<small id="i1"></small></button>
+      <button class="r-good" data-q="2">Good<small id="i2"></small></button>
+      <button class="r-easy" data-q="3">Easy<small id="i3"></small></button>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><i style="background:var(--t-mid)"></i>mid</span>
+    <span><i style="background:var(--t-low)"></i>low ( ` )</span>
+    <span><i style="background:var(--t-fall)"></i>falling ( ^ )</span>
+    <span><i style="background:var(--t-high)"></i>high ( ´ )</span>
+    <span><i style="background:var(--t-rise)"></i>rising ( ˘ )</span>
+    <span>Tap any word for its meaning.</span>
+  </div>
+
+  <nav class="tabs">
+    <button class="ghost" data-p="pWords">Saved words</button>
+    <button class="ghost" data-p="pAll">All sentences</button>
+    <button class="ghost" data-p="pSet">Settings</button>
+  </nav>
+  <div class="panel" id="pWords"></div>
+  <div class="panel" id="pAll"></div>
+  <div class="panel" id="pSet">
+    <div class="row-set">New cards per day <input type="number" id="newPerDay" min="1" max="50"></div>
+    <div class="row-set"><label><input type="checkbox" id="autoplay"> Play the clip automatically on each card</label></div>
+    <div class="row-set"><button id="resetBtn">Reset my progress</button><span class="small" id="resetMsg"></span></div>
+    <p class="small">Progress is kept in this browser on this device.</p>
+  </div>
+</div>
+
+<script>
+const VIDEO = "bqrDJj9i6h4";
+/* token: [thai, translit, dictionary meaning, meaning here, Pali/Sanskrit source] */
+const CARDS = [
+{id:1,s:69,e:80,en:"On the first day of a retreat, the first and the second day,",
+ t:[["วันแรก","wan râek","first day","the opening day of the retreat"],["ของ","kŏng","of; belonging to","of"],["งานปฏิบัติธรรม","ngaan bpà-dtì-bàt tam","Dhamma-practice event; retreat","the meditation retreat","paṭipatti + dhamma"],["วันแรก","wan râek","first day","the first day"],["วันที่สอง","wan têe sŏng","the second day","the second day"],["นั้น","nán","that; (topic marker)","marks the topic: 'as for those days…'"]]},
+{id:2,s:80,e:95,en:"the obstacles, the problems, the arena for developing wisdom, lie in feeling and restlessness.",
+ t:[["อุปสรรค","ùp-bpà-sàk","obstacle, hindrance","the difficulties a meditator meets","upasagga (Skt. upasarga)"],["ปัญหา","bpan-hăa","problem","problems","pañha (lit. 'question')"],["เวที","way-tee","stage, platform, arena","the arena where wisdom is trained","vedi (Skt.)"],["ของ","kŏng","of","of"],["การพัฒนา","gaan pát-tá-naa","development","developing","vaḍḍhana"],["ปัญญา","bpan-yaa","wisdom","wisdom, insight","paññā"],["อยู่ที่","yòo têe","be located at; depend on","lie in, are found in"],["เวทนา","way-tá-naa","feeling; (colloq.) pity, pain","feeling-tone: pleasant, painful or neutral","vedanā"],["กับ","gàp","with; and","and"],["ความฟุ้งซ่าน","kwaam fúng-sâan","restlessness, scattered mind","restlessness, the mind spinning off","≈ uddhacca"]]},
+{id:3,s:95,e:110,en:"Among the five hindrances, feeling isn't counted as a hindrance. Feeling is not a defilement.",
+ t:[["ใน","nai","in; among","among"],["นิวรณ์","ní-won","hindrance","the hindrances to concentration","nīvaraṇa"],["ห้า","hâa","five","five"],["ข้อ","kôr","item, point (classifier)","counts the hindrances"],["เวทนา","way-tá-naa","feeling","feeling","vedanā"],["ก็","gôr","then; also; (linking particle)","softly links: 'well, feeling…'"],["ไม่ได้","mâi dâai","not (did not / is not)","is not"],["ถือว่า","tĕu wâa","to regard as, consider","counted as"],["เป็น","bpen","to be","to be"],["นิวรณ์","ní-won","hindrance","a hindrance","nīvaraṇa"],["เวทนา","way-tá-naa","feeling","feeling","vedanā"],["ไม่ใช่","mâi châi","is not","is not"],["กิเลส","gì-lâyt","defilement","a defilement (greed, aversion, delusion)","kilesa"],["นะ","ná","softening particle","gentle emphasis: 'you see'"]]},
+{id:4,s:110,e:121,en:"What is a defilement, an obstacle, is not wanting to have feeling.",
+ note:"He starts with สิ่งที่เป็นเวทนา and then corrects himself.",
+ t:[["สิ่งที่","sìng têe","the thing that; what","what"],["เป็น","bpen","to be","is"],["กิเลส","gì-lâyt","defilement","a defilement","kilesa"],["เป็น","bpen","to be","is"],["อุปสรรค","ùp-bpà-sàk","obstacle","an obstacle","upasagga"],["ก็คือ","gôr keu","is (namely)","is in fact"],["การ","gaan","(makes a verb into a noun)","the act of"],["ไม่อยาก","mâi yàak","not want","not wanting"],["มี","mee","to have","to have"],["เวทนา","way-tá-naa","feeling","feeling","vedanā"]]},
+{id:5,s:121,e:136,en:"Non-acceptance, irritation, feeling hurt, sorrow, worry, fear",
+ t:[["การไม่ยอมรับ","gaan mâi yom ráp","not accepting","refusing to accept what is felt"],["ความรำคาญ","kwaam ram-kaan","annoyance, irritation","irritation"],["และ","láe","and","and"],["การน้อยใจ","gaan nói jai","feeling hurt, self-pity","feeling sorry for oneself"],["และ","láe","and","and"],["การเสียใจ","gaan sĭia jai","sadness, regret","sadness"],["และ","láe","and","and"],["ความกังวลใจ","kwaam gang-won jai","worry, anxiety","worry"],["ความกลัว","kwaam gluua","fear","fear"]]},
+{id:6,s:136,e:144,en:"that arise because of feeling.",
+ t:[["ที่","têe","which, that","which"],["เกิดขึ้น","gèrt kêun","to arise, occur","arise"],["เพราะ","prór","because (of)","because of"],["เวทนา","way-tá-naa","feeling","feeling","vedanā"]]},
+{id:7,s:143,e:154,en:"Feeling isn't good or bad in itself; it's simply the normal way of nature.",
+ t:[["เวทนา","way-tá-naa","feeling","feeling","vedanā"],["ไม่ใช่","mâi châi","is not","is not"],["เป็น","bpen","to be","(being)"],["สิ่งที่","sìng têe","a thing that","something that is"],["ดี","dee","good","good"],["และ","láe","and","or"],["ร้าย","ráai","bad, harmful","bad"],["อยู่ในตัว","yòo nai dtuua","in itself, inherently","in itself"],["ก็","gôr","so; just","it's just"],["เป็น","bpen","to be","is"],["ธรรมดา","tam-má-daa","normal, ordinary","the normal way","dhammatā"],["ของ","kŏng","of","of"],["ธรรมชาติ","tam-má-châat","nature","nature","dhamma + jāti"]]},
+{id:8,s:154,e:163,en:"But meditation is a good opportunity for us to understand feeling, especially painful feeling.",
+ t:[["แต่","dtàe","but","but"],["การภาวนา","gaan paa-wá-naa","meditation, mental cultivation","meditation practice","bhāvanā"],["เป็น","bpen","to be","is"],["โอกาส","oh-gàat","opportunity","a chance","okāsa"],["ที่ดี","têe dee","that is good","a good (chance)"],["ที่","têe","for (us) to…","for"],["เรา","rao","we, us","us"],["จะ","jà","will; (marks intention)","to (understand)"],["เข้าใจ","kâo jai","to understand","understand"],["เรื่อง","rêuuang","matter, subject","the subject of"],["เวทนา","way-tá-naa","feeling","feeling","vedanā"],["โดยเฉพาะ","doi chà-pór","especially","especially"],["ทุกขเวทนา","túk-ká-way-tá-naa","painful feeling","painful feeling","dukkhavedanā"]]},
+{id:9,s:166,e:182,en:"Painful feeling is something everyone has to face in life, more or less.",
+ t:[["ทุกขเวทนา","túk-ká-way-tá-naa","painful feeling","painful feeling","dukkhavedanā"],["เป็น","bpen","to be","is"],["สิ่งที่","sìng têe","a thing that","something that"],["ทุกคน","túk kon","everyone","everyone"],["ก็","gôr","(linking particle)","(softens: 'well…')"],["ต้อง","dtông","must, have to","has to"],["เผชิญ","pà-chern","to face, confront","face"],["ในชีวิต","nai chee-wít","in life","in life","jīvita"],["ไม่มากก็น้อย","mâi mâak gôr nói","more or less","to some degree"]]},
+{id:10,s:182,e:199,en:"And instinctively, out of habit, whenever there's painful feeling, there's a reaction from the mind,",
+ t:[["และ","láe","and","and"],["โดยสัญชาตญาณ","doi săn-châat-dtà-yaan","by instinct","instinctively","sañjāta + ñāṇa"],["ด้วย","dûuay","with; by","out of"],["ความคุ้นเคย","kwaam kún-koiie","familiarity, habit","habit"],["มี","mee","there is","there is"],["ทุกขเวทนา","túk-ká-way-tá-naa","painful feeling","painful feeling","dukkhavedanā"],["เมื่อไหร่","mêuua-rài","when; whenever","whenever"],["ก็จะ","gôr jà","then (will)","then there will be"],["มี","mee","there is","there is"],["ปฏิกิริยา","bpà-dtì-gì-rí-yaa","reaction","a reaction","paṭikiriyā"],["จาก","jàak","from","from"],["จิตใจ","jìt-jai","mind, heart","the mind","citta"]]},
+{id:11,s:199,e:216,en:"which is what I just described: the clouding of the mind that arises because of feeling.",
+ t:[["ที่ว่า","têe wâa","that which (was said)","what I said"],["เมื่อกี้นี้","mêuua-gêe-née","just now, a moment ago","just now"],["คือ","keu","namely, is","namely"],["เป็น","bpen","to be","is"],["ความเศร้าหมอง","kwaam sâo-mŏng","gloom, tarnish","the mind's clouding, its tarnish (≈ upakkilesa)"],["ในจิต","nai jìt","in the mind","in the mind","citta"],["ที่","têe","which","which"],["เกิดขึ้น","gèrt kêun","to arise","arises"],["เพราะ","prór","because of","because of"],["เวทนา","way-tá-naa","feeling","feeling","vedanā"]]},
+{id:12,s:216,e:226,en:"Now, changing from sitting comfortably on chairs to sitting on the floor",
+ t:[["ทีนี้","tee-née","now (then)","now"],["การเปลี่ยน","gaan bplìian","changing","changing"],["จาก","jàak","from","from"],["นั่ง","nâng","to sit","sitting (on)"],["เก้าอี้","gâo-êe","chair","chairs"],["นั่งสบายๆ","nâng sà-baai sà-baai","sit comfortably","sitting at ease"],["มา","maa","to come; (toward)","to (come to)"],["นั่ง","nâng","to sit","sitting"],["กับพื้น","gàp péun","on the floor","on the floor"]]},
+{id:13,s:226,e:239,en:"for many hours a day, there will surely be some feeling, more or less.",
+ t:[["วันหนึ่ง","wan nèung","one day; per day","in a day"],["หลาย","lăai","many","many"],["ชั่วโมง","chûua-mohng","hour","hours"],["ก็","gôr","so","so"],["คงจะ","kong jà","probably, surely will","surely will"],["ต้อง","dtông","must","have to"],["มี","mee","to have; there is","be"],["เวทนา","way-tá-naa","feeling","feeling (here: physical pain)","vedanā"],["บ้าง","bâang","some, somewhat","some"],["ไม่มากก็น้อย","mâi mâak gôr nói","more or less","more or less"]]},
+{id:14,s:239,e:257,flag:true,en:"One shouldn't expect there to be none. But how do we rightly practise with feeling?",
+ note:"The auto-captions are unclear here. Listen closely; the wording may differ a little.",
+ t:[["ไม่พึง","mâi peung","should not","one shouldn't"],["คาดหวัง","kâat-wăng","to expect","expect"],["ว่า","wâa","that","that"],["จะไม่มี","jà mâi mee","there will be none","there will be none"],["แต่","dtàe","but","but"],["การปฏิบัติ","gaan bpà-dtì-bàt","practice","the practice","paṭipatti"],["ธรรมจริยา","tam-má-jà-rí-yaa","righteous conduct","the right way of conduct","dhammacariyā"],["ในเรื่องของ","nai rêuuang kŏng","in the matter of","with regard to"],["เวทนา","way-tá-naa","feeling","feeling","vedanā"],["มัน","man","it","it"],["เป็นอย่างไร","bpen yàang-rai","how is it?","what is it like?"]]},
+{id:15,s:257,e:268,en:"Let's begin with the benefits of staying with feeling.",
+ t:[["เรา","rao","we","we"],["เริ่ม","rêrm","to begin","begin"],["ที่","têe","at","with"],["อานิสงส์","aa-ní-sŏng","merit, benefit","the benefits","ānisaṃsa"],["ของ","kŏng","of","of"],["การอยู่กับ","gaan yòo gàp","staying with","staying with"],["เวทนา","way-tá-naa","feeling","feeling","vedanā"],["ก่อน","gòn","first, before","first"]]},
+{id:16,s:268,e:280,en:"Because feeling, and painful feeling, are part of human life, something everyone must face,",
+ t:[["เพราะ","prór","because","because"],["เมื่อ","mêuua","when; since","since"],["เวทนา","way-tá-naa","feeling","feeling","vedanā"],["และ","láe","and","and"],["ทุกขเวทนา","túk-ká-way-tá-naa","painful feeling","painful feeling","dukkhavedanā"],["เป็น","bpen","to be","are"],["ส่วนหนึ่ง","sùuan nèung","a part","a part"],["ของ","kŏng","of","of"],["ชีวิต","chee-wít","life","life","jīvita"],["มนุษย์","má-nút","human being","human","manussa"],["เป็น","bpen","to be","is"],["สิ่งที่","sìng têe","a thing that","something that"],["ทุกคน","túk kon","everyone","everyone"],["ต้อง","dtông","must","must"],["เผชิญ","pà-chern","to face","face"]]},
+{id:17,s:278,e:295,en:"and everyone has an instinct to create defilements toward feeling, until the mental torment that arises is more than it needs to be.",
+ t:[["และ","láe","and","and"],["ทุกคน","túk kon","everyone","everyone"],["มี","mee","to have","has"],["สัญชาตญาณ","săn-châat-dtà-yaan","instinct","an instinct","sañjāta + ñāṇa"],["ที่จะ","têe jà","to (do)","to"],["สร้าง","sâang","to build, create","create"],["กิเลส","gì-lâyt","defilement","defilements","kilesa"],["ต่อ","dtòr","toward; in response to","toward"],["เวทนา","way-tá-naa","feeling","feeling","vedanā"],["จนกระทั่ง","jon grà-tâng","until","until"],["ความทรมานใจ","kwaam tor-rá-maan jai","mental torment","suffering of the mind"],["ที่","têe","that","that"],["เกิดขึ้น","gèrt kêun","to arise","arises"],["มากกว่า","mâak gwàa","more than","more than"],["ที่ควรจะเป็น","têe kuuan jà bpen","what it should be","it needs to be"]]},
+{id:18,s:318,e:328,en:"When we feel aversion to and fear of feeling, painful feeling,",
+ t:[["เมื่อ","mêuua","when","when"],["เรา","rao","we","we"],["มี","mee","to have","have"],["ความรังเกียจ","kwaam rang-gìiat","aversion, disgust","aversion"],["ความกลัว","kwaam gluua","fear","fear (of)"],["เวทนา","way-tá-naa","feeling","feeling","vedanā"],["ทุกขเวทนา","túk-ká-way-tá-naa","painful feeling","painful feeling","dukkhavedanā"]]},
+{id:19,s:328,e:340,en:"the harm is that patience finds it hard to arise. Patience burns up the defilements.",
+ t:[["ผลเสีย","pŏn sĭia","bad result, drawback","the harm","phala"],["ที่","têe","that","that"],["เกิดขึ้น","gèrt kêun","to arise","arises"],["คือ","keu","is","is"],["ความอดทน","kwaam òt-ton","patience, endurance","patience (≈ khanti)"],["จะ","jà","will","will"],["เกิดขึ้น","gèrt kêun","to arise","arise"],["ได้ยาก","dâai yâak","hard to (manage)","with difficulty"],["ความอดทน","kwaam òt-ton","patience","patience"],["นี่","nêe","this; (emphasis)","you see,"],["เผา","păo","to burn","burns up"],["กิเลส","gì-lâyt","defilement","the defilements","kilesa"]]},
+{id:20,s:337,e:358,en:"If we fear feeling or worry about feeling, patience will be fairly hard to develop.",
+ t:[["ถ้า","tâa","if","if"],["เรา","rao","we","we"],["กลัว","gluua","to fear","fear"],["เวทนา","way-tá-naa","feeling","feeling","vedanā"],["หรือว่า","rĕu wâa","or","or"],["กังวล","gang-won","to worry","worry"],["ในเวทนา","nai way-tá-naa","about feeling","about feeling","vedanā"],["ความอดทน","kwaam òt-ton","patience","patience"],["จะ","jà","will","will"],["เกิดขึ้นได้","gèrt kêun dâai","be able to arise","be able to arise"],["ยาก","yâak","difficult","hardly"],["พอสมควร","por sŏm-kuuan","fairly, quite","fairly"]]}
+];
+
+/* ---------- storage ---------- */
+const KEY="talkcards.th.jayasaro.vedana";
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let S=load(); S.cards=S.cards||{}; S.words=S.words||[]; S.newPerDay=S.newPerDay||10;
+S.autoplay = S.autoplay!==false;
+const today=()=>Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5);
+if(S.day!==today()){S.day=today();S.newToday=0}
+
+/* ---------- scheduling (SM-2 style) ---------- */
+function st(id){return S.cards[id]||{reps:0,ease:2.5,ivl:0,due:0,seen:false}}
+function preview(c,q){
+  let ease=c.ease, ivl;
+  if(q===0) return {ivl:0,ease:Math.max(1.3,ease-.2)};
+  if(!c.seen||c.reps===0) ivl=q===1?1:q===2?1:4;
+  else ivl=q===1?Math.max(1,Math.round(c.ivl*1.2)):q===2?Math.round(c.ivl*ease):Math.round(c.ivl*ease*1.3);
+  ease=q===1?Math.max(1.3,ease-.15):q===3?ease+.15:ease;
+  return {ivl,ease};
+}
+function label(d){return d===0?"<10 min":d===1?"1 day":d<30?d+" days":Math.round(d/30)+" mo"}
+function queue(){
+  const due=[], fresh=[];
+  for(const c of CARDS){const s=st(c.id); if(s.seen){ if(s.due<=Date.now()) due.push(c)} else fresh.push(c)}
+  due.sort((a,b)=>st(a.id).due-st(b.id).due);
+  const room=Math.max(0,S.newPerDay-(S.newToday||0));
+  return {due, fresh:fresh.slice(0,room), allNew:fresh.length};
+}
+
+/* ---------- tones ---------- */
+function tone(syl){
+  const n=syl.normalize("NFD");
+  if(/̀/.test(n))return"low"; if(/̂/.test(n))return"fall";
+  if(/́/.test(n))return"high"; if(/[̆̌]/.test(n))return"rise"; return"mid";
+}
+const TC={mid:"var(--t-mid)",low:"var(--t-low)",fall:"var(--t-fall)",high:"var(--t-high)",rise:"var(--t-rise)"};
+function colorTr(tr){
+  return tr.split(" ").map(w=>w.split("-").map(s=>`<span style="color:${TC[tone(s)]}">${s}</span>`).join("-")).join(" ");
+}
+
+/* ---------- YouTube ---------- */
+let player, ready=false, stopAt=null, timer=null, rate=1, current=null, revealed=false;
+const tag=document.createElement("script"); tag.src="https://www.youtube.com/iframe_api"; document.head.appendChild(tag);
+window.onYouTubeIframeAPIReady=()=>{
+  player=new YT.Player("player",{videoId:VIDEO,playerVars:{rel:0,modestbranding:1,playsinline:1,controls:0,cc_load_policy:0,iv_load_policy:3},
+    events:{onReady:()=>{ready=true}}});
+};
+function play(s,e){
+  if(!ready)return;
+  player.setPlaybackRate(rate); player.seekTo(s,true); player.playVideo(); stopAt=e;
+  clearInterval(timer);
+  timer=setInterval(()=>{ if(player.getCurrentTime()>=stopAt){player.pauseVideo();clearInterval(timer)} },80);
+}
+const $=id=>document.getElementById(id);
+$("replay").onclick=()=>current&&play(current.s,current.e);
+$("ctx").onclick=()=>current&&play(Math.max(0,current.s-4),current.e+3);
+$("slow").onclick=()=>{rate=rate===1?.75:1;$("slow").classList.toggle("on",rate!==1);current&&play(current.s,current.e)};
+
+/* ---------- card flow ---------- */
+function stats(){
+  const q=queue(); $("sNew").textContent=q.allNew; $("sDue").textContent=q.due.length;
+  $("sDone").textContent=CARDS.filter(c=>st(c.id).seen&&st(c.id).ivl>=1).length;
+}
+function next(){
+  const q=queue(); current=q.due[0]||q.fresh[0]||null; revealed=false;
+  stats(); $("rateBox").style.display="none";
+  if(!current){
+    $("body").innerHTML=`<div class="done-box"><h2>Sādhu, all done for today</h2><p class="small">Come back tomorrow for the cards that are due.<br>You can raise the number of new cards in Settings.</p></div>`;
+    $("revealBox").style.display="none"; $("meta").textContent=""; return;
+  }
+  const s=st(current.id);
+  $("meta").textContent=`Sentence ${current.id} of ${CARDS.length} · ${s.seen?"review":"new"}`;
+  $("body").innerHTML=`${current.flag?'<div class="flag">'+current.note+'</div>':''}<div class="hint">Listen, and try to understand before you reveal.</div>`;
+  $("revealBox").style.display="block";
+  if(S.autoplay) play(current.s,current.e);
+}
+function show(){
+  revealed=true; const c=current;
+  const thai=c.t.map((w,i)=>`<span class="w" data-i="${i}">${w[0]}</span>`).join("");
+  const tr=c.t.map((w,i)=>`<span class="w" data-i="${i}">${colorTr(w[1])}</span>`).join(" ");
+  $("body").innerHTML=`${c.note&&!c.flag?'<div class="flag">'+c.note+'</div>':''}${c.flag?'<div class="flag">'+c.note+'</div>':''}
+    <div class="thai">${thai}</div><div class="tr">${tr}</div>
+    <div class="gloss" id="gloss"></div><div class="en">${c.en}</div>`;
+  $("body").querySelectorAll(".w").forEach(el=>el.onclick=()=>gloss(+el.dataset.i));
+  $("revealBox").style.display="none"; $("rateBox").style.display="grid";
+  const s=st(c.id); for(let q=0;q<4;q++) $("i"+q).textContent=label(preview(s,q).ivl);
+}
+function gloss(i){
+  const w=current.t[i], g=$("gloss");
+  $("body").querySelectorAll(".w").forEach(el=>el.classList.toggle("sel",+el.dataset.i===i));
+  const saved=S.words.some(x=>x[0]===w[0]&&x[2]===w[2]);
+  g.innerHTML=`<span class="gt">${w[0]}</span><span class="gr">${colorTr(w[1])}</span>
+    <div class="row"><span class="lab">Dictionary</span>${w[2]}</div>
+    <div class="row"><span class="lab">Here</span>${w[3]}</div>
+    ${w[4]?`<div class="row"><span class="lab">Pāli / Sanskrit</span><span class="pali">${w[4]}</span></div>`:""}
+    <button class="save" id="saveW">${saved?"★ Saved":"☆ Save word"}</button>`;
+  g.classList.add("show");
+  $("saveW").onclick=()=>{ if(!saved){S.words.push([...w,current.id]);save();gloss(i);renderWords()} };
+}
+$("reveal").onclick=show;
+$("rateBox").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+  const q=+b.dataset.q, s=st(current.id), p=preview(s,q);
+  if(!s.seen) S.newToday=(S.newToday||0)+1;
+  S.cards[current.id]={seen:true,reps:q===0?0:s.reps+1,ease:p.ease,ivl:p.ivl,due:Date.now()+(p.ivl===0?6e5:p.ivl*864e5)};
+  save(); next();
+});
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT")return;
+  if(e.code==="Space"){e.preventDefault(); if(!revealed&&current) show(); else if(current) play(current.s,current.e)}
+  if(revealed&&["Digit1","Digit2","Digit3","Digit4"].includes(e.code)) $("rateBox").querySelectorAll("button")[+e.code.slice(-1)-1].click();
+});
+$("startBtn").onclick=()=>{$("shade").style.display="none"; next(); if(!S.autoplay&&current) play(current.s,current.e)};
+
+/* ---------- panels ---------- */
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{
+  const p=$(b.dataset.p), open=p.classList.contains("show");
+  document.querySelectorAll(".panel").forEach(x=>x.classList.remove("show"));
+  document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.remove("on"));
+  if(!open){p.classList.add("show");b.classList.add("on")}
+});
+function renderWords(){
+  $("pWords").innerHTML=S.words.length?S.words.map(w=>`<div class="list-item"><span class="th">${w[0]}</span> &nbsp;${colorTr(w[1])}<br>${w[2]}${w[4]?` · <i class="pali">${w[4]}</i>`:""} <span class="small">· sentence ${w[5]}</span></div>`).join("")
+    :`<p class="small">Tap ☆ Save word on any word you want to keep. Saved words will become their own cards later.</p>`;
+}
+function renderAll(){
+  $("pAll").innerHTML=CARDS.map(c=>{const s=st(c.id);
+    return `<div class="list-item"><span class="th">${c.t.map(w=>w[0]).join("")}</span><br>${c.en}<br><span class="small">${Math.floor(c.s/60)}:${String(c.s%60).padStart(2,"0")} · ${s.seen?"next in "+label(Math.max(0,Math.round((s.due-Date.now())/864e5))):"not started"}</span></div>`}).join("");
+}
+$("newPerDay").value=S.newPerDay;
+$("newPerDay").onchange=e=>{S.newPerDay=Math.max(1,+e.target.value||10);save();stats()};
+$("autoplay").checked=S.autoplay; $("autoplay").onchange=e=>{S.autoplay=e.target.checked;save()};
+$("resetBtn").onclick=()=>{ if($("resetBtn").dataset.sure){S.cards={};S.newToday=0;save();$("resetMsg").textContent="Progress cleared.";delete $("resetBtn").dataset.sure;stats();renderAll()} else {$("resetBtn").dataset.sure=1;$("resetMsg").textContent="Press again to confirm."} };
+document.querySelector('[data-p="pAll"]').addEventListener("click",renderAll);
+renderWords(); stats();
+</script>
+</body>
+</html>
