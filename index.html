@@ -656,6 +656,7 @@ function pickVoice(){
   const sel=$("voiceSel");
   sel.innerHTML=vs.length?vs.map(v=>`<option value="${v.name}">${v.name}${/online|natural|premium|enhanced/i.test(v.name)?" ★":""}</option>`).join(""):'<option value="">No Thai voice on this device</option>';
   if(thVoice) sel.value=thVoice.name;
+  sel.parentElement.style.display=vs.length>1?"":"none";
   $("voiceNote").textContent=thVoice?"":(speechSynthesis.getVoices().length?"No Thai voice is installed on this device. On iPhone: Settings › Accessibility › Spoken Content › Voices › Thai.":"");
 }
 if("speechSynthesis" in window){ speechSynthesis.onvoiceschanged=pickVoice; }
