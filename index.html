@@ -139,6 +139,10 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
   .body{padding:12px 14px 2px}
   .phone{display:inline}.lbl{display:none}.lbl2{display:none}.msub{display:none}
   .talk .talkbar{padding:6px 10px 10px;gap:6px}
+  .modes{margin-bottom:6px;padding:3px}.modes button{padding:6px 4px;font-size:15px}
+  .talk .stage{--vh:14svh}
+  .talk .tpos{padding:0 14px}.talk .controls{border-bottom:0;padding-bottom:2px}
+  .talk .body{padding-top:6px}
   .rate{padding:4px 10px 10px;gap:6px}.rate button{padding:6px 2px}
   .gloss{padding:7px 10px;margin-bottom:6px}.gloss .gt{font-size:20px}.gloss .row{font-size:14px}
   .reveal{padding:2px 10px 12px}.reveal button{padding:12px}
@@ -199,7 +203,7 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
     <span><i style="background:var(--t-fall)"></i>falling ( ^ )</span>
     <span><i style="background:var(--t-high)"></i>high ( ´ )</span>
     <span><i style="background:var(--t-rise)"></i>rising ( ˘ )</span>
-    <span>Tap any word for its meaning.</span><span class="phone">Swipe ← Again · Good →</span>
+    <span>Tap any word for its meaning.</span><span class="phone" id="swipeHint">Swipe ← Again · Good →</span>
   </div>
 
   <nav class="tabs">
@@ -505,6 +509,7 @@ function go(){ inTalk()?showTalk(S.pos):next() }
 function modeUI(){
   document.querySelectorAll("#modes button").forEach(b=>b.classList.toggle("on",b.dataset.m===S.mode));
   $("card").classList.toggle("talk",inTalk()); startPanel();
+  $("swipeHint").textContent=inTalk()?"Swipe ← next sentence · previous →":"Swipe ← Again · Good →";
 }
 function startPanel(){
   if(inTalk()){
@@ -512,7 +517,7 @@ function startPanel(){
     $("spK").textContent="Talk order"+(S.passes?` · pass ${S.passes+1}`:"");
     $("spN").innerHTML=i?`Sentence <b>${i+1}</b> of ${CARDS.length}`:`<b>${CARDS.length}</b> sentences`;
     $("startBtn").innerHTML=i?`▶&nbsp; Continue from sentence ${i+1}`:"▶&nbsp; Start from the beginning";
-    $("spP").innerHTML="Go through the talk in order, one sentence at a time.<br>Mark any sentence to practise it later in Study.";
+    $("spP").innerHTML="Go through the talk in order,<br>one sentence at a time.<br>Mark any sentence to practise later in Study.";
   } else {
     $("spK").textContent="Today’s session";
     const q=queue(); $("spN").innerHTML=`<b>${q.fresh.length}</b> new <span class="dot">·</span> <b>${q.due.length}</b> to review`;
