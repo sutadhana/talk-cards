@@ -42,6 +42,9 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
   text-align:center;padding:12px;z-index:3}
 .shade h2{font-weight:300;font-size:19px;margin:0 0 4px;text-wrap:balance}
 .shade p{margin:0 0 12px;opacity:.8;font-size:13.5px}
+.replayRow{padding:10px 14px 0;display:flex;justify-content:center}
+#replay{width:min(100%,340px);font-size:19px;padding:12px 18px;border-radius:14px;border:1.5px solid var(--saffron);background:#fdf6ec;color:var(--maroon)}
+#replay:active{background:#fbe9d2}
 .controls{display:flex;flex-wrap:wrap;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);align-items:center;justify-content:center}
 button{font:inherit;cursor:pointer;border-radius:12px;border:1px solid var(--line);background:#fff;
   padding:8px 13px;color:var(--ink);transition:transform .08s,background .15s}
@@ -104,7 +107,7 @@ button:disabled{opacity:.4;cursor:default}
 .card.swl{animation:swl .25s}.card.swr{animation:swr .25s}
 @keyframes swl{30%{transform:translateX(-14px)}}@keyframes swr{30%{transform:translateX(14px)}}
 .sync{border-top:1px solid var(--line);margin-top:12px;padding-top:6px}
-.pre .controls,.pre .body,.pre .reveal,.pre .rate{display:none!important}
+.pre .replayRow,.pre .controls,.pre .body,.pre .reveal,.pre .rate{display:none!important}
 .pre .video::after{content:"";position:absolute;inset:0;z-index:2}
 .startPanel{text-align:center;padding:22px 20px 26px}
 .card:not(.pre) .startPanel{display:none}
@@ -175,6 +178,8 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
   .brand small{display:none}
   .brand h1{font-size:17px;margin:0}.brand h1 .sub{display:none}
   .stats{font-size:12px;gap:4px}.pill{padding:4px 8px}
+  .replayRow{padding:8px 10px 0}#replay{font-size:18px;padding:11px 16px;width:100%}
+  .stage{--vh:15svh}
   .controls{padding:7px 8px;gap:6px}.controls button{padding:6px 10px;font-size:14.5px}
   .body{padding:12px 14px 2px}
   .phone{display:inline}.lbl{display:none}.lbl2{display:none}.msub{display:none}
@@ -214,9 +219,9 @@ input[type=number]{font:inherit;width:70px;padding:6px 8px;border-radius:8px;bor
       <button class="primary sp-go" id="startBtn">▶&nbsp; Start session</button>
       <p class="sp-p" id="spP">Each card plays Ajahn Jayasaro saying one sentence.<br>Listen first, then reveal the answer.</p>
     </div>
+    <div class="replayRow"><button id="replay">↻&nbsp; Replay</button></div>
     <div class="controls">
       <button id="prev" title="Previous card (←)">←<span class="lbl"> Previous</span></button>
-      <button id="replay">↻<span class="lbl"> Replay</span></button>
       <button id="slow">0.75×</button>
       <button id="ctx" title="Play a little before and after">Context</button>
       <span class="meta" id="meta"></span>
